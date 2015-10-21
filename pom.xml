@@ -7,6 +7,14 @@
 	<artifactId>com.mxhero.plugin.cloudstorage.onedriveapi</artifactId>
 	<version>0.2.1-SNAPSHOT</version>
 
+	<scm>
+		<connection>scm:git:git@github.com:mxhero/onedrive-api.git</connection>
+		<url>scm:git:git@github.com:mxhero/onedrive-api.git</url>
+		<developerConnection>scm:git:git@github.com:mxhero/onedrive-api.git</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
+
+
 	<distributionManagement>
 		<repository>
 			<id>org.mxhero.releases</id>
