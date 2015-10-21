@@ -1,0 +1,187 @@
+package com.mxhero.plugin.cloudstorage.onedrive.api.command;
+
+/*
+ * #%L
+ * com.mxhero.plugin.cloudstorage.sharefile
+ * %%
+ * Copyright (C) 2013 - 2014 mxHero Inc.
+ * %%
+ * MXHERO END USER LICENSE AGREEMENT
+ * 
+ * IMPORTANT-READ CAREFULLY:  BY DOWNLOADING, INSTALLING, OR USING THE SOFTWARE, YOU (THE INDIVIDUAL OR LEGAL ENTITY) AGREE TO BE BOUND BY THE TERMS OF THIS END USER LICENSE AGREEMENT (EULA).  IF YOU DO NOT AGREE TO THE TERMS OF THIS EULA, YOU MUST NOT DOWNLOAD, INSTALL, OR USE THE SOFTWARE, AND YOU MUST DELETE OR RETURN THE UNUSED SOFTWARE TO THE VENDOR FROM WHICH YOU ACQUIRED IT WITHIN THIRTY (30) DAYS AND REQUEST A REFUND OF THE LICENSE FEE, IF ANY, THAT YOU PAID FOR THE SOFTWARE.
+ * 
+ * READ LICENSE.txt file to see details of this agreement.
+ * #L%
+ */
+
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang.Validate;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.mxhero.plugin.cloudstorage.onedrive.api.Credential;
+import com.mxhero.plugin.cloudstorage.onedrive.api.ApiEnviroment;
+import com.mxhero.plugin.cloudstorage.onedrive.api.Application;
+import com.mxhero.plugin.cloudstorage.onedrive.api.OneDrive;
+
+/**
+ * The Class RetryCommand.
+ *
+ * @param <T> the generic type
+ */
+public class RetryCommand<T> implements Command<T>{
+	
+	/** The logger. */
+	private static Logger logger = LoggerFactory.getLogger(RetryCommand.class);
+	
+	/** The credential. */
+	protected Credential credential;
+	
+	/** The client builder. */
+	protected HttpClientBuilder clientBuilder;
+	
+	private Application application;
+	
+	/** The base url. */
+	private String baseUrl = ApiEnviroment.baseUrl.getValue();
+	
+	/**
+	 * Instantiates a new command.
+	 *
+	 * @param clientBuilder the client builder
+	 * @param credential the credential
+	 */
+	public RetryCommand(HttpClientBuilder clientBuilder, Application application, Credential credential){
+		Validate.notNull(credential, "credential may not be null");
+		Validate.notNull(clientBuilder, "clientBuilder may not be null");
+		this.credential=credential;
+		this.clientBuilder=clientBuilder;
+		this.application=application;
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.mxhero.plugin.cloudstorage.sharefile.http.command.Command#excecute(com.mxhero.plugin.cloudstorage.sharefile.http.command.CommandHandler)
+	 */
+	public T excecute(CommandHandler<T> handler){
+		T value = null;
+		try{
+			value =  handlerExecute(handler);
+			logger.debug("command executed");
+		}catch(AuthenticationException e){
+			refreshToken();
+			logger.debug("refresh token executed");
+			value =  handlerExecute(handler);
+			logger.debug("command with refresh token executed");
+		}
+		return value;
+	}
+	
+	/**
+	 * Refresh token.
+	 */
+	private void refreshToken(){
+		CloseableHttpResponse response = null;
+		CloseableHttpClient client = null;
+		try {
+			client = clientBuilder.build();
+			
+			HttpPost post = new HttpPost(ApiEnviroment.tokenBaseUrl.getValue());
+			post.setHeader("Content-Type", "application/x-www-form-urlencoded");
+			List<NameValuePair> postParams = new ArrayList<>();
+			postParams.add(new BasicNameValuePair("grant_type", "refresh_token"));
+			postParams.add(new BasicNameValuePair("refresh_token", credential.getRefreshToken()));
+			postParams.add(new BasicNameValuePair("redirect_uri", application.getRedirectUri()));
+			postParams.add(new BasicNameValuePair("client_id", application.getClientId()));
+			postParams.add(new BasicNameValuePair("client_secret", application.getClientSecret()));
+			post.setEntity(new UrlEncodedFormEntity(postParams));
+			response = client.execute(post);
+			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> result = OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), Map.class);
+				this.credential.setAccessToken(result.get("access_token").toString());
+				if(result.containsKey("refresh_token")){
+					this.credential.setRefreshToken(result.get("refresh_token").toString());
+				}
+				if(credential.getListener()!=null){
+					try{
+						credential.getListener().onSuccess(credential, result);
+					}catch(Exception e){
+						logger.warn("error executing listener ON SUCESS for credential "+credential+", ignoring",e);
+					}
+				}
+			}else if(response.getStatusLine().getStatusCode() == 429 ||
+					response.getStatusLine().getStatusCode() == 503){
+				throw new RetryException("http code "+response.getStatusLine().getStatusCode()+" throw retry");
+			}else{
+				if(credential.getListener()!=null){
+					try{
+						credential.getListener().onFaliure(credential, response.getStatusLine().getStatusCode());
+					}catch(Exception e){
+						logger.warn("error executing listener ON FALIURE for credential "+credential+", ignoring",e);
+					}
+				}
+				throw new RetryException("error making POST");
+			}
+		} catch (IOException  e) {
+			throw new RetryException(e);
+		}finally{
+			if(response!=null){
+				try{response.close();}catch(Exception e){};
+			}
+		}
+	}
+	
+	/**
+	 * Handler execute.
+	 *
+	 * @param handler the handler
+	 * @return the t
+	 */
+	private T handlerExecute(CommandHandler<T> handler){
+		CloseableHttpResponse response = null;
+		CloseableHttpClient client = null;
+		try {
+			HttpUriRequest request = handler.request();
+			request.setHeader("Authorization","Bearer "+credential.getAccessToken());
+			client = clientBuilder.build();
+			response = client.execute(request);
+			if(response.getStatusLine().getStatusCode()==401){
+				throw new AuthenticationException("401 for "+credential.getUserId());
+			}else if(response.getStatusLine().getStatusCode() == 429 ||
+					response.getStatusLine().getStatusCode() == 503){
+				throw new RetryException("http code "+response.getStatusLine().getStatusCode()+" throw retry");
+			}
+			return handler.response(response);
+		} catch (IOException  e) {
+			throw new RetryException(e);
+		}finally{
+			if(response!=null){
+				try{response.close();}catch(Exception e){};
+			}
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.mxhero.plugin.cloudstorage.onedrive.api.command.Command#baseUrl()
+	 */
+	@Override
+	public String baseUrl() {
+		return baseUrl;
+	}
+
+}
