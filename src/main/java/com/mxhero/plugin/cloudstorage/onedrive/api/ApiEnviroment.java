@@ -53,10 +53,7 @@ public enum ApiEnviroment {
 	socketTimeout("ONEDRIVE_SOCKET_TIMEOUT", "onedrive.socket.timeout","30000"),
 	
 	/** The retries. */
-	retries("ONEDRIVE_RETRIES", "onedrive.retries","5"),
-	
-	/** The app id. */
-	appId("ONEDRIVE_MXHERO_APP_ID", "onedrive.mxhero.app.id", "6e83b8b826dd345c4b53cc56f2e9812d");
+	retries("ONEDRIVE_RETRIES", "onedrive.retries","5");
 
 	/** The enviroment. */
 	private String enviroment;
