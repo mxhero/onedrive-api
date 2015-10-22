@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.mxhero.plugin.cloudstorage</groupId>
 	<artifactId>org.mxhero.plugin.cloudstorage.onedriveapi</artifactId>
-	<version>0.2.1</version>
+	<version>0.2.2-SNAPSHOT</version>
 
 	<scm>
 		<connection>scm:git:git@github.com:mxhero/onedrive-api.git</connection>
