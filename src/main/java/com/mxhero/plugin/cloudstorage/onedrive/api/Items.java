@@ -402,7 +402,15 @@ public class Items {
 			
 			@Override
 			public Permission response(HttpResponse response) {
-				return null;
+				try {
+					if(response.getStatusLine().getStatusCode()==HttpStatus.SC_CREATED
+							|| response.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
+						return OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), Permission.class);
+					}
+				} catch (Exception e) {
+					throw new IllegalArgumentException("error reading response",e);
+				}
+				throw new RuntimeException("error reading response with code "+response.getStatusLine().getStatusCode());
 			}
 			
 			@Override
