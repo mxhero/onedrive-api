@@ -524,6 +524,7 @@ public class Items {
 			public HttpUriRequest request() {
 				HttpPost httpPost = new HttpPost(ApiEnviroment.baseUrl.getValue()+path);
 				httpPost.setHeader("Content-type", "application/json");
+				httpPost.setHeader("Prefer","respond-async");
 				try{
 					Map<String,Object> body = new HashMap<>();
 					if(StringUtils.isNotBlank(parentReference.getPath())
