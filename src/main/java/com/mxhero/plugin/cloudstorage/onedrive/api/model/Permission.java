@@ -28,8 +28,8 @@ public class Permission {
 	/** The id. */
 	private String id;
 	
-	/** The role. */
-	private List<String> role;
+	/** The roles. */
+	private List<String> roles;
 	
 	/** The link. */
 	private SharingLink link;
@@ -56,21 +56,21 @@ public class Permission {
 	}
 
 	/**
-	 * Gets the role.
+	 * Gets the roles.
 	 *
-	 * @return the role
+	 * @return the roles
 	 */
-	public List<String> getRole() {
-		return role;
+	public List<String> getRoles() {
+		return roles;
 	}
 
 	/**
-	 * Sets the role.
+	 * Sets the roles.
 	 *
-	 * @param role the new role
+	 * @param roles the new roles
 	 */
-	public void setRole(List<String> role) {
-		this.role = role;
+	public void setRoles(List<String> roles) {
+		this.roles = roles;
 	}
 
 	/**
