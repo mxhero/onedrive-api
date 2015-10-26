@@ -266,7 +266,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadById(String parentId, String name, InputStream inputStream, ConflictBehavior conflictBehavior){
-		return simpleUpload(DRIVE_ITEMS+parentId+CHILDREN+"/"+name+":"+CONTENT, inputStream, conflictBehavior);
+		return simpleUpload(DRIVE_ITEMS+parentId+CHILDREN+"/"+name+CONTENT, inputStream, conflictBehavior);
 	}
 	
 	/**
