@@ -827,7 +827,7 @@ public class Items {
 				} catch (UnsupportedEncodingException e) {
 				}
 			}
-			return cleanPath.substring(0,cleanPath.length());
+			return cleanPath.substring(0,cleanPath.length()-1);
 		}
 		return null;
 	}
