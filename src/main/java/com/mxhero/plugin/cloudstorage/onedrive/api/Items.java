@@ -415,7 +415,7 @@ public class Items {
 			
 			@Override
 			public HttpUriRequest request() {
-				HttpPost httpPost = new HttpPost(ApiEnviroment.baseUrl.getValue()+path);
+				HttpPost httpPost = new HttpPost(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
 				httpPost.setHeader("Content-type", "application/json");
 				try{
 					Map<String,Object> body = new HashMap<>();
@@ -492,7 +492,7 @@ public class Items {
 			
 			@Override
 			public HttpUriRequest request() {
-				HttpPatch httpPatch = new HttpPatch(ApiEnviroment.baseUrl.getValue()+path);
+				HttpPatch httpPatch = new HttpPatch(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
 				httpPatch.setHeader("Content-type", "application/json");
 				StringEntity entity;
 				try {
@@ -530,7 +530,7 @@ public class Items {
 			
 			@Override
 			public HttpUriRequest request() {
-				HttpPost httpPost = new HttpPost(ApiEnviroment.baseUrl.getValue()+path);
+				HttpPost httpPost = new HttpPost(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
 				httpPost.setHeader("Content-type", "application/json");
 				httpPost.setHeader("Prefer","respond-async");
 				try{
@@ -573,7 +573,7 @@ public class Items {
 			
 			@Override
 			public HttpUriRequest request() {
-				return new HttpGet(ApiEnviroment.baseUrl.getValue()+path);
+				return new HttpGet(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
 			}
 		});
 	}
@@ -606,7 +606,7 @@ public class Items {
 			@Override
 			public HttpUriRequest request() {
 				try{
-					URIBuilder builder = new URIBuilder(ApiEnviroment.baseUrl.getValue()+path);
+					URIBuilder builder = new URIBuilder(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
 					builder.addParameter("@name.conflictBehavior", conflictBehavior.name());
 					HttpPut httpPut = new HttpPut(builder.build().toString());
 					httpPut.setHeader("Content-Type", "text/plain");
@@ -692,7 +692,7 @@ public class Items {
 			
 			@Override
 			public HttpUriRequest request() {
-				HttpPatch httpPatch = new HttpPatch(ApiEnviroment.baseUrl.getValue()+path);
+				HttpPatch httpPatch = new HttpPatch(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
 				httpPatch.setHeader("Content-type", "application/json");
 				StringEntity entity;
 				try {
@@ -726,7 +726,7 @@ public class Items {
 			
 			@Override
 			public HttpUriRequest request() {
-				return new HttpDelete(ApiEnviroment.baseUrl.getValue()+path);
+				return new HttpDelete(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
 			}
 		});
 	}
@@ -759,7 +759,7 @@ public class Items {
 			@Override
 			public HttpUriRequest request() {
 				try {
-					URIBuilder builder = new URIBuilder(ApiEnviroment.baseUrl.getValue()+path);
+					URIBuilder builder = new URIBuilder(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
 					if(parameters!=null){
 						builder.addParameters(parameters.list());
 					}
@@ -802,7 +802,7 @@ public class Items {
 			@Override
 			public HttpUriRequest request() {
 				try {
-					URIBuilder builder = new URIBuilder(ApiEnviroment.baseUrl.getValue()+path);
+					URIBuilder builder = new URIBuilder(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
 					if(parameters!=null){
 						builder.addParameters(parameters.list());
 					}
