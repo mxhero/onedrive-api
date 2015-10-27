@@ -257,7 +257,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadByPath(String path, String name, InputStream inputStream, ConflictBehavior conflictBehavior){
-		return simpleUpload(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+"/"+name+":"+CONTENT, inputStream, conflictBehavior);
+		return simpleUpload(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+"/"+cleanAndEncodePath(name)+":"+CONTENT, inputStream, conflictBehavior);
 	}
 	
 	/**
@@ -270,7 +270,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadById(String parentId, String name, InputStream inputStream, ConflictBehavior conflictBehavior){
-		return simpleUpload(DRIVE_ITEMS+parentId+CHILDREN+"/"+name+CONTENT, inputStream, conflictBehavior);
+		return simpleUpload(DRIVE_ITEMS+parentId+CHILDREN+"/"+cleanAndEncodePath(name)+CONTENT, inputStream, conflictBehavior);
 	}
 	
 	/**
@@ -313,7 +313,7 @@ public class Items {
 	 * @return the string
 	 */
 	public String copyById(String id, ItemReference parentReference, String name){
-		return postCopy(DRIVE_ITEMS+id+COPY,parentReference,name);
+		return postCopy(DRIVE_ITEMS+id+COPY,parentReference,cleanAndEncodePath(name));
 	}
 	
 	/**
