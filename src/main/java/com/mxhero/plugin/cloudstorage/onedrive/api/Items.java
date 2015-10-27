@@ -16,6 +16,8 @@
 package com.mxhero.plugin.cloudstorage.onedrive.api;
 
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,6 +53,8 @@ public class Items {
 
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(Items.class);
+	
+	public static final String RESERVED_CHARACTERS_PATTERN = "[/\\*<>?:|#%]";
 	
 	/** The Constant DRIVE_ITEMS. */
 	public static final String DRIVE_ITEMS = "/drive/items/";
@@ -123,7 +127,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item metadataByPath(String path){
-		return this.metadataByPath(path,null);
+		return this.metadataByPath(cleanAndEncodePath(path),null);
 	}
 	
 	/**
@@ -134,7 +138,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item metadataByPath(String path, Parameters odata){
-		return this.itemGet(DRIVE_ROOT+((StringUtils.isNotBlank(path))?":/"+path:""),odata);
+		return this.itemGet(DRIVE_ROOT+((StringUtils.isNotBlank(cleanAndEncodePath(path)))?":/"+path:""),odata);
 	}
 	
 	/**
@@ -165,7 +169,7 @@ public class Items {
 	 * @return the item list
 	 */
 	public ItemList childrenByPath(String path){
-		return this.childrenByPath(path,null);
+		return this.childrenByPath(cleanAndEncodePath(path),null);
 	}
 	
 	/**
@@ -176,7 +180,7 @@ public class Items {
 	 * @return the item list
 	 */
 	public ItemList childrenByPath(String path, Parameters odata){
-		return this.itemListGet(DRIVE_ROOT+((StringUtils.isNotBlank(path))?(":/"+path+":"):"")+CHILDREN, odata);
+		return this.itemListGet(DRIVE_ROOT+((StringUtils.isNotBlank(cleanAndEncodePath(path)))?(":/"+path+":"):"")+CHILDREN, odata);
 	}
 	
 	/**
@@ -187,7 +191,7 @@ public class Items {
 	 * @return the item list
 	 */
 	public ItemList searchByPath(String path, Parameters odata){
-		return this.itemListGet(DRIVE_ROOT+((StringUtils.isNotBlank(path))?(":/"+path+":/"):"")+SEARCH, odata);		
+		return this.itemListGet(DRIVE_ROOT+((StringUtils.isNotBlank(cleanAndEncodePath(path)))?(":/"+path+":/"):"")+SEARCH, odata);		
 	}
 	
 	/**
@@ -218,7 +222,7 @@ public class Items {
 	 * @return the boolean
 	 */
 	public Boolean deleteByPath(String path){
-		return this.deleteItem(DRIVE_ROOT+":/"+path);
+		return this.deleteItem(DRIVE_ROOT+":/"+cleanAndEncodePath(path));
 	}
 	
 	/**
@@ -240,7 +244,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item updateByPath(String path, Item item){
-		return this.updateItem(DRIVE_ROOT+":/"+path, item);
+		return this.updateItem(DRIVE_ROOT+":/"+cleanAndEncodePath(path), item);
 	}
 	
 	/**
@@ -253,7 +257,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadByPath(String path, String name, InputStream inputStream, ConflictBehavior conflictBehavior){
-		return simpleUpload(DRIVE_ROOT+":/"+path+"/"+name+":"+CONTENT, inputStream, conflictBehavior);
+		return simpleUpload(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+"/"+name+":"+CONTENT, inputStream, conflictBehavior);
 	}
 	
 	/**
@@ -286,7 +290,7 @@ public class Items {
 	 * @return the string
 	 */
 	public String downloadUrlByPath(String path){
-		return getDownloadUrl(DRIVE_ROOT+":/"+path+":"+CONTENT);
+		return getDownloadUrl(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+":"+CONTENT);
 	}
 	
 	/**
@@ -320,7 +324,7 @@ public class Items {
 	 * @return the string
 	 */
 	public String copyByPath(String path, ItemReference parentReference){
-		return postCopy(DRIVE_ROOT+":/"+path+":"+COPY,parentReference,null);
+		return postCopy(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+":"+COPY,parentReference,null);
 	}
 	
 	/**
@@ -332,7 +336,7 @@ public class Items {
 	 * @return the string
 	 */
 	public String copyByPath(String path, ItemReference parentReference, String name){
-		return postCopy(DRIVE_ROOT+":/"+path+":"+COPY,parentReference,name);
+		return postCopy(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+":"+COPY,parentReference,name);
 	}
 	
 	/**
@@ -354,7 +358,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item moveByPath(String path, ItemReference parentReference){
-		return patchMove(DRIVE_ROOT+":/"+path, parentReference);
+		return patchMove(DRIVE_ROOT+":/"+cleanAndEncodePath(path), parentReference);
 	}
 
 	/**
@@ -376,7 +380,7 @@ public class Items {
 	 * @return the permission
 	 */
 	public Permission createLinkByPath(String path, String type){
-		return postCreateLink(DRIVE_ROOT+":/"+path+":/action.createLink", type);
+		return postCreateLink(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+":/action.createLink", type);
 	}
 	
 	/**
@@ -415,7 +419,7 @@ public class Items {
 			
 			@Override
 			public HttpUriRequest request() {
-				HttpPost httpPost = new HttpPost(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
+				HttpPost httpPost = new HttpPost(ApiEnviroment.baseUrl.getValue()+path);
 				httpPost.setHeader("Content-type", "application/json");
 				try{
 					Map<String,Object> body = new HashMap<>();
@@ -492,7 +496,7 @@ public class Items {
 			
 			@Override
 			public HttpUriRequest request() {
-				HttpPatch httpPatch = new HttpPatch(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
+				HttpPatch httpPatch = new HttpPatch(ApiEnviroment.baseUrl.getValue()+path);
 				httpPatch.setHeader("Content-type", "application/json");
 				StringEntity entity;
 				try {
@@ -530,7 +534,7 @@ public class Items {
 			
 			@Override
 			public HttpUriRequest request() {
-				HttpPost httpPost = new HttpPost(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
+				HttpPost httpPost = new HttpPost(ApiEnviroment.baseUrl.getValue()+path);
 				httpPost.setHeader("Content-type", "application/json");
 				httpPost.setHeader("Prefer","respond-async");
 				try{
@@ -573,7 +577,7 @@ public class Items {
 			
 			@Override
 			public HttpUriRequest request() {
-				return new HttpGet(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
+				return new HttpGet(ApiEnviroment.baseUrl.getValue()+path);
 			}
 		});
 	}
@@ -606,7 +610,7 @@ public class Items {
 			@Override
 			public HttpUriRequest request() {
 				try{
-					URIBuilder builder = new URIBuilder(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
+					URIBuilder builder = new URIBuilder(ApiEnviroment.baseUrl.getValue()+path);
 					builder.addParameter("@name.conflictBehavior", conflictBehavior.name());
 					HttpPut httpPut = new HttpPut(builder.build().toString());
 					httpPut.setHeader("Content-Type", "text/plain");
@@ -692,7 +696,7 @@ public class Items {
 			
 			@Override
 			public HttpUriRequest request() {
-				HttpPatch httpPatch = new HttpPatch(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
+				HttpPatch httpPatch = new HttpPatch(ApiEnviroment.baseUrl.getValue()+path);
 				httpPatch.setHeader("Content-type", "application/json");
 				StringEntity entity;
 				try {
@@ -726,7 +730,7 @@ public class Items {
 			
 			@Override
 			public HttpUriRequest request() {
-				return new HttpDelete(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
+				return new HttpDelete(ApiEnviroment.baseUrl.getValue()+path);
 			}
 		});
 	}
@@ -759,7 +763,7 @@ public class Items {
 			@Override
 			public HttpUriRequest request() {
 				try {
-					URIBuilder builder = new URIBuilder(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
+					URIBuilder builder = new URIBuilder(ApiEnviroment.baseUrl.getValue()+path);
 					if(parameters!=null){
 						builder.addParameters(parameters.list());
 					}
@@ -802,7 +806,7 @@ public class Items {
 			@Override
 			public HttpUriRequest request() {
 				try {
-					URIBuilder builder = new URIBuilder(ApiEnviroment.baseUrl.getValue()+path.replace(" ", "%20"));
+					URIBuilder builder = new URIBuilder(ApiEnviroment.baseUrl.getValue()+path);
 					if(parameters!=null){
 						builder.addParameters(parameters.list());
 					}
@@ -812,5 +816,19 @@ public class Items {
 				}
 			}
 		});
+	}
+	
+	public static String cleanAndEncodePath(String path){
+		if(path!=null){
+			String cleanPath="";
+			for(String segment : path.split("/")){
+				try {
+					cleanPath=cleanPath+URLEncoder.encode(segment.replace(RESERVED_CHARACTERS_PATTERN, " "),"UTF-8")+"/";
+				} catch (UnsupportedEncodingException e) {
+				}
+			}
+			return cleanPath.substring(0,cleanPath.length());
+		}
+		return null;
 	}
 }
