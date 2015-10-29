@@ -25,7 +25,7 @@ public class ItemsTest {
 
 	@Test
 	public void testCleanAndEncodePath(){
-		assertEquals("Documents/one+test/+suck+this%28%29",Items.cleanAndEncodePath("Documents/one test/ suck this()"));
+		assertEquals("Documents/one+test/suck+this%28%29",Items.cleanAndEncodePath("Documents/one test/ suck this()"));
 	}
 	
 }
