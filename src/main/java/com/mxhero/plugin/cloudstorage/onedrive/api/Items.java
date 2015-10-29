@@ -823,7 +823,7 @@ public class Items {
 			String cleanPath="";
 			for(String segment : path.split("/")){
 				try {
-					cleanPath=cleanPath+URLEncoder.encode(segment.replace(RESERVED_CHARACTERS_PATTERN, " "),"UTF-8")+"/";
+					cleanPath=cleanPath+URLEncoder.encode(segment.replaceAll(RESERVED_CHARACTERS_PATTERN, " "),"UTF-8")+"/";
 				} catch (UnsupportedEncodingException e) {
 				}
 			}
