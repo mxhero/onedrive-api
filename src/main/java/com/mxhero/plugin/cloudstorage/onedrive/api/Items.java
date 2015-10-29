@@ -545,7 +545,7 @@ public class Items {
 					}
 					body.put("parentReference", parentReference);
 					if(StringUtils.isNotBlank(name)){
-						body.put("name",name);
+						body.put("name",name.replaceAll(RESERVED_CHARACTERS_PATTERN, " ").trim());
 					}
 					httpPost.setEntity(new StringEntity(OneDrive.JACKSON.writeValueAsString(body), "UTF-8"));
 					return httpPost;
@@ -658,7 +658,7 @@ public class Items {
 				HttpPost httpPost = new HttpPost(postUrl);
 				httpPost.setHeader("Content-type", "application/json");
 				Map<String, Object> item = new HashMap<>();
-				item.put("name", name);
+				item.put("name", name.replaceAll(Items.RESERVED_CHARACTERS_PATTERN, " ").trim());
 				item.put("folder", new HashMap<>());
 				item.put("@name.conflictBehavior", conflictBehavior.name());
 				try {
@@ -823,7 +823,7 @@ public class Items {
 			String cleanPath="";
 			for(String segment : path.split("/")){
 				try {
-					cleanPath=cleanPath+URLEncoder.encode(segment.replaceAll(RESERVED_CHARACTERS_PATTERN, " "),"UTF-8")+"/";
+					cleanPath=cleanPath+URLEncoder.encode(segment.replaceAll(RESERVED_CHARACTERS_PATTERN, " ").trim(),"UTF-8")+"/";
 				} catch (UnsupportedEncodingException e) {
 				}
 			}
