@@ -14,6 +14,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.mxhero.plugin.cloudstorage.onedrive.api.Items.ConflictBehavior;
+import com.mxhero.plugin.cloudstorage.onedrive.api.command.ApiException;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.Drive;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.Item;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.ItemList;
@@ -189,6 +190,29 @@ public class OneDriveTest {
 				, ConflictBehavior.replace);
 		items.deleteByPath("Pictures/delete.png");
 		assertNull(items.metadataByPath("Pictures/delete.png"));
+	}
+	
+	@Test
+	public void apiException() throws FileNotFoundException{
+		assumeNotNull(testEnviroment);
+		Items items = createApi().items();
+		items.deleteByPath("Pictures/delete.png");
+		items.simpleUploadByPath("Pictures"
+				, "delete.png"
+				, getFile()
+				, ConflictBehavior.replace);
+		try{
+		items.simpleUploadByPath("Pictures"
+				, "delete.png"
+				, getFile()
+				, ConflictBehavior.fail);
+		fail();
+		}catch(ApiException e){
+			assertNotNull(e.getReasonPhrase());
+			assertNotNull(e.getStatusCode());
+			assertNotNull(e.getError());
+			System.out.println("error found "+e.getError().toString());
+		}
 	}
 	
 	@Test

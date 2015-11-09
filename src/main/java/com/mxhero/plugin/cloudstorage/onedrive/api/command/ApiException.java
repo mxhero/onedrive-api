@@ -2,10 +2,12 @@ package com.mxhero.plugin.cloudstorage.onedrive.api.command;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
+import org.codehaus.jackson.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mxhero.plugin.cloudstorage.onedrive.api.OneDrive;
+import com.mxhero.plugin.cloudstorage.onedrive.api.model.ResponseError;
 
 /**
  * The Class ApiException.
@@ -23,7 +25,7 @@ public class ApiException extends RuntimeException{
 	private String reasonPhrase;
 	
 	/** The error. */
-	private Error error;
+	private ResponseError error;
 
 	/**
 	 * Instantiates a new api exception.
@@ -32,9 +34,13 @@ public class ApiException extends RuntimeException{
 	 */
 	public ApiException(HttpResponse response) {
 		super(response.getStatusLine().toString());
+		this.reasonPhrase=response.getStatusLine().toString();
 		this.statusCode=response.getStatusLine().getStatusCode();
 		try {
-			this.error=OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), Error.class);
+			JsonNode content = OneDrive.JACKSON.readTree(EntityUtils.toString(response.getEntity()));
+			if(content.has("error")){
+				this.error=OneDrive.JACKSON.treeToValue(content.get("error"), ResponseError.class);
+			}
 		} catch (Exception e) {
 			logger.debug("error reading error response",e);
 		}
@@ -81,7 +87,7 @@ public class ApiException extends RuntimeException{
 	 *
 	 * @return the error
 	 */
-	public Error getError() {
+	public ResponseError getError() {
 		return error;
 	}
 
@@ -90,7 +96,7 @@ public class ApiException extends RuntimeException{
 	 *
 	 * @param error the new error
 	 */
-	public void setError(Error error) {
+	public void setError(ResponseError error) {
 		this.error = error;
 	}
 	

@@ -4,9 +4,9 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
- * The Class Error.
+ * The Class ResponseError.
  */
-public class Error {
+public class ResponseError {
 
 	/** The code. */
 	private String code;
@@ -15,7 +15,7 @@ public class Error {
 	private String message;
 	
 	/** The innererror. */
-	private Error innererror;
+	private ResponseError innererror;
 	
 	/**
 	 * Gets the code.
@@ -58,7 +58,7 @@ public class Error {
 	 *
 	 * @return the innererror
 	 */
-	public Error getInnererror() {
+	public ResponseError getInnererror() {
 		return innererror;
 	}
 
@@ -67,7 +67,7 @@ public class Error {
 	 *
 	 * @param innererror the new innererror
 	 */
-	public void setInnererror(Error innererror) {
+	public void setInnererror(ResponseError innererror) {
 		this.innererror = innererror;
 	}
 
