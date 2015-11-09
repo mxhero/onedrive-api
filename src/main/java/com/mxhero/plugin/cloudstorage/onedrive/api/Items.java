@@ -15,12 +15,16 @@
  */
 package com.mxhero.plugin.cloudstorage.onedrive.api;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -31,7 +35,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -54,6 +59,7 @@ public class Items {
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(Items.class);
 	
+	/** The Constant RESERVED_CHARACTERS_PATTERN. */
 	public static final String RESERVED_CHARACTERS_PATTERN = "[/\\*<>?:|#%]";
 	
 	/** The Constant DRIVE_ITEMS. */
@@ -68,8 +74,10 @@ public class Items {
 	/** The Constant ROOT_ID. */
 	public static final String DRIVE_ROOT = "/drive/root";
 	
+	/** The Constant CONTENT. */
 	public static final String CONTENT = "/content";
 	
+	/** The Constant COPY. */
 	public static final String COPY = "/action.copy";
 	
 	/** The command factory. */
@@ -147,7 +155,7 @@ public class Items {
 	 * @param id the id
 	 * @return the item list
 	 */
-	public ItemList childrenById(String id){
+	public ItemList childrenById(String id) {
 		return this.childrenById(id,null);
 	}
 	
@@ -257,7 +265,20 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadByPath(String path, String name, InputStream inputStream, ConflictBehavior conflictBehavior){
-		return simpleUpload(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+"/"+cleanAndEncodePath(name)+":"+CONTENT, inputStream, conflictBehavior);
+		return simpleUploadStream(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+"/"+cleanAndEncodePath(name)+":"+CONTENT, inputStream, conflictBehavior);
+	}
+	
+	/**
+	 * Simple upload by path.
+	 *
+	 * @param path the path
+	 * @param name the name
+	 * @param file the file
+	 * @param conflictBehavior the conflict behavior
+	 * @return the item
+	 */
+	public Item simpleUploadByPath(String path, String name, File file, ConflictBehavior conflictBehavior){
+		return simpleUpload(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+"/"+cleanAndEncodePath(name)+":"+CONTENT, file, conflictBehavior);
 	}
 	
 	/**
@@ -270,9 +291,22 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadById(String parentId, String name, InputStream inputStream, ConflictBehavior conflictBehavior){
-		return simpleUpload(DRIVE_ITEMS+parentId+CHILDREN+"/"+cleanAndEncodePath(name)+CONTENT, inputStream, conflictBehavior);
+		return simpleUploadStream(DRIVE_ITEMS+parentId+CHILDREN+"/"+cleanAndEncodePath(name)+CONTENT, inputStream, conflictBehavior);
 	}
 	
+	/**
+	 * Simple upload by id.
+	 *
+	 * @param parentId the parent id
+	 * @param name the name
+	 * @param file the file
+	 * @param conflictBehavior the conflict behavior
+	 * @return the item
+	 */
+	public Item simpleUploadById(String parentId, String name, File file, ConflictBehavior conflictBehavior){
+		return simpleUpload(DRIVE_ITEMS+parentId+CHILDREN+"/"+cleanAndEncodePath(name)+CONTENT, file, conflictBehavior);
+	}
+
 	/**
 	 * Download url by id.
 	 *
@@ -412,14 +446,14 @@ public class Items {
 						return OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), Permission.class);
 					}
 				} catch (Exception e) {
-					throw new IllegalArgumentException("error reading response",e);
+					throw new IllegalArgumentException("error reading response body",e);
 				}
-				throw new RuntimeException("error reading response with code "+response.getStatusLine().getStatusCode());
+				throw new IllegalArgumentException("error reading response with code "+response.getStatusLine().getStatusCode());
 			}
 			
 			@Override
 			public HttpUriRequest request() {
-				HttpPost httpPost = new HttpPost(ApiEnviroment.baseUrl.getValue()+path);
+				HttpPost httpPost = new HttpPost(command.baseUrl()+path);
 				httpPost.setHeader("Content-type", "application/json");
 				try{
 					Map<String,Object> body = new HashMap<>();
@@ -427,7 +461,7 @@ public class Items {
 					httpPost.setEntity(new StringEntity(OneDrive.JACKSON.writeValueAsString(body), "UTF-8"));
 					return httpPost;
 				} catch (Exception e) {
-					throw new RuntimeException("error sending path for "+httpPost, e);
+					throw new IllegalArgumentException("error sending path for "+httpPost, e);
 				}
 			}
 		});
@@ -450,7 +484,7 @@ public class Items {
 					if(response.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
 						return OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), ThumbnailSetList.class);
 					}
-					throw new RuntimeException("error reading response with code "+response.getStatusLine().getStatusCode());
+					throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 				} catch (Exception e) {
 					throw new IllegalArgumentException("error reading response",e);
 				}
@@ -459,13 +493,13 @@ public class Items {
 			@Override
 			public HttpUriRequest request() {
 				try {
-					URIBuilder builder = new URIBuilder(ApiEnviroment.baseUrl.getValue()+DRIVE_ITEMS+id+"/thumbnails");
+					URIBuilder builder = new URIBuilder(command.baseUrl()+DRIVE_ITEMS+id+"/thumbnails");
 					if(parameters!=null){
 						builder.addParameters(parameters.list());
 					}
 					return new HttpGet(builder.build().toString());
 				} catch (Exception e) {
-					throw new RuntimeException("couldn't create query with "+parameters,e);
+					throw new IllegalArgumentException("couldn't create query with "+parameters,e);
 				}
 			}
 		});
@@ -488,7 +522,7 @@ public class Items {
 					if(response.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
 						return OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), Item.class);
 					}
-					throw new RuntimeException("error reading response with code "+response.getStatusLine().getStatusCode());
+					throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 				} catch (Exception e) {
 					throw new IllegalArgumentException("error reading response",e);
 				}
@@ -496,7 +530,7 @@ public class Items {
 			
 			@Override
 			public HttpUriRequest request() {
-				HttpPatch httpPatch = new HttpPatch(ApiEnviroment.baseUrl.getValue()+path);
+				HttpPatch httpPatch = new HttpPatch(command.baseUrl()+path);
 				httpPatch.setHeader("Content-type", "application/json");
 				StringEntity entity;
 				try {
@@ -504,7 +538,7 @@ public class Items {
 					body.put("parentReference", parentReference);
 					entity = new StringEntity(OneDrive.JACKSON.writeValueAsString(body), "UTF-8");
 				} catch (Exception e) {
-					throw new RuntimeException("error sending path for "+path, e);
+					throw new IllegalArgumentException("error sending path for "+path, e);
 				}
 				httpPatch.setEntity(entity);
 				return httpPatch;
@@ -529,12 +563,12 @@ public class Items {
 				if(response.getStatusLine().getStatusCode()==HttpStatus.SC_ACCEPTED){
 					return response.getFirstHeader("Location").getValue();
 				}
-				throw new RuntimeException("error reading response with code "+response.getStatusLine().getStatusCode());
+				throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 			}
 			
 			@Override
 			public HttpUriRequest request() {
-				HttpPost httpPost = new HttpPost(ApiEnviroment.baseUrl.getValue()+path);
+				HttpPost httpPost = new HttpPost(command.baseUrl()+path);
 				httpPost.setHeader("Content-type", "application/json");
 				httpPost.setHeader("Prefer","respond-async");
 				try{
@@ -550,7 +584,7 @@ public class Items {
 					httpPost.setEntity(new StringEntity(OneDrive.JACKSON.writeValueAsString(body), "UTF-8"));
 					return httpPost;
 				} catch (Exception e) {
-					throw new RuntimeException("error sending path for "+httpPost, e);
+					throw new IllegalArgumentException("error sending path for "+httpPost, e);
 				}
 			}
 		});
@@ -572,12 +606,12 @@ public class Items {
 				if(response.getStatusLine().getStatusCode()==HttpStatus.SC_MOVED_TEMPORARILY){
 					return response.getFirstHeader("Location").getValue();
 				}
-				throw new RuntimeException("error reading response with code "+response.getStatusLine().getStatusCode());
+				throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 			}
 			
 			@Override
 			public HttpUriRequest request() {
-				return new HttpGet(ApiEnviroment.baseUrl.getValue()+path);
+				return new HttpGet(command.baseUrl()+path);
 			}
 		});
 	}
@@ -586,11 +620,11 @@ public class Items {
 	 * Simple upload.
 	 *
 	 * @param path the path
-	 * @param inputStream the input stream
+	 * @param file the file
 	 * @param conflictBehavior the conflict behavior
 	 * @return the item
 	 */
-	private Item simpleUpload(final String path, final InputStream inputStream, final ConflictBehavior conflictBehavior){
+	private Item simpleUpload(final String path, final File file, final ConflictBehavior conflictBehavior){
 		final Command<Item> command = this.commandFactory.create();
 		return command.excecute(new CommandHandler<Item>() {
 			
@@ -601,23 +635,26 @@ public class Items {
 							|| response.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
 						return OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), Item.class);
 					}
-					throw new RuntimeException("error reading response with code "+response.getStatusLine().getStatusCode());
+					throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 				} catch (Exception e) {
 					throw new IllegalArgumentException("error reading response",e);
 				}
 			}
 			
+			/* (non-Javadoc)
+			 * @see com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandHandler#request()
+			 */
 			@Override
 			public HttpUriRequest request() {
 				try{
-					URIBuilder builder = new URIBuilder(ApiEnviroment.baseUrl.getValue()+path);
+					URIBuilder builder = new URIBuilder(command.baseUrl()+path);
 					builder.addParameter("@name.conflictBehavior", conflictBehavior.name());
 					HttpPut httpPut = new HttpPut(builder.build().toString());
 					httpPut.setHeader("Content-Type", "text/plain");
-					httpPut.setEntity(new InputStreamEntity(inputStream));
+					httpPut.setEntity(new FileEntity(file, ContentType.TEXT_PLAIN));
 					return httpPut;
 				} catch (Exception e) {
-					throw new RuntimeException("couldn't create query",e);
+					throw new IllegalArgumentException("couldn't create query",e);
 				}
 			}
 		});
@@ -641,7 +678,7 @@ public class Items {
 					if(response.getStatusLine().getStatusCode()==HttpStatus.SC_CREATED){
 						return OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), Item.class);
 					}
-					throw new RuntimeException("error reading response with code "+response.getStatusLine().getStatusCode());
+					throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 				} catch (Exception e) {
 					throw new IllegalArgumentException("error reading response",e);
 				}
@@ -649,7 +686,7 @@ public class Items {
 			
 			@Override
 			public HttpUriRequest request() {
-				String postUrl = ApiEnviroment.baseUrl.getValue();
+				String postUrl = command.baseUrl();
 				if(StringUtils.isBlank(parentId)|| "root".equalsIgnoreCase(parentId)){
 					postUrl+=DRIVE_ROOT+CHILDREN;
 				}else{
@@ -664,7 +701,7 @@ public class Items {
 				try {
 					httpPost.setEntity(new StringEntity(OneDrive.JACKSON.writeValueAsString(item), "UTF-8"));
 				} catch (Exception e) {
-					throw new RuntimeException("error sending path for "+httpPost, e);
+					throw new IllegalArgumentException("error sending path for "+httpPost, e);
 				}
 				return httpPost;
 			}
@@ -688,7 +725,7 @@ public class Items {
 					if(response.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
 						return OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), Item.class);
 					}
-					throw new RuntimeException("error reading response with code "+response.getStatusLine().getStatusCode());
+					throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 				} catch (Exception e) {
 					throw new IllegalArgumentException("error reading response",e);
 				}
@@ -696,13 +733,13 @@ public class Items {
 			
 			@Override
 			public HttpUriRequest request() {
-				HttpPatch httpPatch = new HttpPatch(ApiEnviroment.baseUrl.getValue()+path);
+				HttpPatch httpPatch = new HttpPatch(command.baseUrl()+path);
 				httpPatch.setHeader("Content-type", "application/json");
 				StringEntity entity;
 				try {
 					entity = new StringEntity(OneDrive.JACKSON.writeValueAsString(item), "UTF-8");
 				} catch (Exception e) {
-					throw new RuntimeException("error sending path for "+path, e);
+					throw new IllegalArgumentException("error sending path for "+path, e);
 				}
 				httpPatch.setEntity(entity);
 				return httpPatch;
@@ -730,7 +767,7 @@ public class Items {
 			
 			@Override
 			public HttpUriRequest request() {
-				return new HttpDelete(ApiEnviroment.baseUrl.getValue()+path);
+				return new HttpDelete(command.baseUrl()+path);
 			}
 		});
 	}
@@ -749,12 +786,12 @@ public class Items {
 			@Override
 			public ItemList response(HttpResponse response) {
 				try {
-					if(response.getStatusLine().getStatusCode()==404){
+					if(response.getStatusLine().getStatusCode()==HttpStatus.SC_NOT_FOUND){
 						return null;
 					}else if(response.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
 						return OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), ItemList.class);
 					}
-					throw new RuntimeException("error reading response with code "+response.getStatusLine().getStatusCode());
+					throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 				} catch (Exception e) {
 					throw new IllegalArgumentException("error reading response",e);
 				}
@@ -763,13 +800,13 @@ public class Items {
 			@Override
 			public HttpUriRequest request() {
 				try {
-					URIBuilder builder = new URIBuilder(ApiEnviroment.baseUrl.getValue()+path);
+					URIBuilder builder = new URIBuilder(command.baseUrl()+path);
 					if(parameters!=null){
 						builder.addParameters(parameters.list());
 					}
 					return new HttpGet(builder.build().toString());
 				} catch (Exception e) {
-					throw new RuntimeException("couldn't create query with "+parameters,e);
+					throw new IllegalArgumentException("couldn't create query with "+parameters,e);
 				}
 			}
 		});
@@ -791,13 +828,13 @@ public class Items {
 			@Override
 			public Item response(HttpResponse response) {
 				try {
-					if(response.getStatusLine().getStatusCode()==404){
+					if(response.getStatusLine().getStatusCode()==HttpStatus.SC_NOT_FOUND){
 						return null;
 					}else if(response.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
 						String value = EntityUtils.toString(response.getEntity());
 						return OneDrive.JACKSON.readValue(value, Item.class);
 					}
-					throw new RuntimeException("error reading response with code "+response.getStatusLine().getStatusCode());
+					throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 				} catch (Exception e) {
 					throw new IllegalArgumentException("error reading response",e);
 				}
@@ -806,18 +843,24 @@ public class Items {
 			@Override
 			public HttpUriRequest request() {
 				try {
-					URIBuilder builder = new URIBuilder(ApiEnviroment.baseUrl.getValue()+path);
+					URIBuilder builder = new URIBuilder(command.baseUrl()+path);
 					if(parameters!=null){
 						builder.addParameters(parameters.list());
 					}
 					return new HttpGet(builder.build().toString());
 				} catch (Exception e) {
-					throw new RuntimeException("couldn't create query with "+parameters,e);
+					throw new IllegalArgumentException("couldn't create query with "+parameters,e);
 				}
 			}
 		});
 	}
 	
+	/**
+	 * Clean and encode path.
+	 *
+	 * @param path the path
+	 * @return the string
+	 */
 	public static String cleanAndEncodePath(String path){
 		if(path!=null){
 			String cleanPath="";
@@ -830,5 +873,29 @@ public class Items {
 			return cleanPath.substring(0,cleanPath.length()-1);
 		}
 		return null;
+	}
+	
+	/**
+	 * Simple upload stream.
+	 *
+	 * @param path the path
+	 * @param inputStream the input stream
+	 * @param conflictBehavior the conflict behavior
+	 * @return the item
+	 */
+	private Item simpleUploadStream(final String path, final InputStream inputStream, final ConflictBehavior conflictBehavior){
+		File tmpFile = null;
+		try{
+			tmpFile = Files.createTempFile(new File(ApiEnviroment.tempUploadFolder.getValue()).toPath(), "odtmp",".data").toFile();
+			FileUtils.copyInputStreamToFile(inputStream, tmpFile);
+			return simpleUpload(path, tmpFile, conflictBehavior);
+		} catch (IOException e) {
+			throw new IllegalArgumentException("couldnt read or store inputstream");
+		}
+		finally{
+			if(tmpFile!=null){
+				FileUtils.deleteQuietly(tmpFile);
+			}
+		}
 	}
 }

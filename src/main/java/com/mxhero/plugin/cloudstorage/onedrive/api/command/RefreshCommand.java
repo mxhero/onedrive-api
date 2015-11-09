@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -55,14 +56,14 @@ import com.mxhero.plugin.cloudstorage.onedrive.api.Application;
 import com.mxhero.plugin.cloudstorage.onedrive.api.OneDrive;
 
 /**
- * The Class RetryCommand.
+ * The Class RefreshCommand.
  *
  * @param <T> the generic type
  */
-public class RetryCommand<T> implements Command<T>{
+public class RefreshCommand<T> implements Command<T>{
 	
 	/** The logger. */
-	private static Logger logger = LoggerFactory.getLogger(RetryCommand.class);
+	private static Logger logger = LoggerFactory.getLogger(RefreshCommand.class);
 	
 	/** The credential. */
 	protected Credential credential;
@@ -70,6 +71,7 @@ public class RetryCommand<T> implements Command<T>{
 	/** The client builder. */
 	protected HttpClientBuilder clientBuilder;
 	
+	/** The application. */
 	private Application application;
 	
 	/** The base url. */
@@ -79,9 +81,10 @@ public class RetryCommand<T> implements Command<T>{
 	 * Instantiates a new command.
 	 *
 	 * @param clientBuilder the client builder
+	 * @param application the application
 	 * @param credential the credential
 	 */
-	public RetryCommand(HttpClientBuilder clientBuilder, Application application, Credential credential){
+	public RefreshCommand(HttpClientBuilder clientBuilder, Application application, Credential credential){
 		Validate.notNull(credential, "credential may not be null");
 		Validate.notNull(clientBuilder, "clientBuilder may not be null");
 		this.credential=credential;
@@ -90,7 +93,7 @@ public class RetryCommand<T> implements Command<T>{
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.mxhero.plugin.cloudstorage.sharefile.http.command.Command#excecute(com.mxhero.plugin.cloudstorage.sharefile.http.command.CommandHandler)
+	 * @see com.mxhero.plugin.cloudstorage.onedrive.api.command.Command#excecute(com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandHandler)
 	 */
 	public T excecute(CommandHandler<T> handler){
 		T value = null;
@@ -98,10 +101,12 @@ public class RetryCommand<T> implements Command<T>{
 			value =  handlerExecute(handler);
 			logger.debug("command executed");
 		}catch(AuthenticationException e){
-			refreshToken();
-			logger.debug("refresh token executed");
-			value =  handlerExecute(handler);
-			logger.debug("command with refresh token executed");
+			if(StringUtils.isNotEmpty(credential.getRefreshToken())){
+				refreshToken();
+				logger.debug("refresh token executed");
+				value =  handlerExecute(handler);
+				logger.debug("command with refresh token executed");
+			}
 		}
 		return value;
 	}
@@ -139,9 +144,6 @@ public class RetryCommand<T> implements Command<T>{
 						logger.warn("error executing listener ON SUCESS for credential "+credential+", ignoring",e);
 					}
 				}
-			}else if(response.getStatusLine().getStatusCode() == 429 ||
-					response.getStatusLine().getStatusCode() == 503){
-				throw new RetryException("http code "+response.getStatusLine().getStatusCode()+" throw retry");
 			}else{
 				if(credential.getListener()!=null){
 					try{
@@ -150,10 +152,9 @@ public class RetryCommand<T> implements Command<T>{
 						logger.warn("error executing listener ON FALIURE for credential "+credential+", ignoring",e);
 					}
 				}
-				throw new RetryException("error making POST");
 			}
 		} catch (IOException  e) {
-			throw new RetryException(e);
+			throw new IllegalArgumentException(e);
 		}finally{
 			if(response!=null){
 				try{response.close();}catch(Exception e){};
@@ -167,7 +168,7 @@ public class RetryCommand<T> implements Command<T>{
 	 * @param handler the handler
 	 * @return the t
 	 */
-	private T handlerExecute(CommandHandler<T> handler){
+	private T handlerExecute(CommandHandler<T> handler) throws ApiException{
 		CloseableHttpResponse response = null;
 		CloseableHttpClient client = null;
 		try {
@@ -175,15 +176,16 @@ public class RetryCommand<T> implements Command<T>{
 			request.setHeader("Authorization","Bearer "+credential.getAccessToken());
 			client = clientBuilder.build();
 			response = client.execute(request);
-			if(response.getStatusLine().getStatusCode()==401){
+			if(response.getStatusLine().getStatusCode()==HttpStatus.SC_UNAUTHORIZED){
 				throw new AuthenticationException("401 for "+credential.getUserId());
-			}else if(response.getStatusLine().getStatusCode() == 429 ||
-					response.getStatusLine().getStatusCode() == 503){
-				throw new RetryException("http code "+response.getStatusLine().getStatusCode()+" throw retry");
+			}else if(response.getStatusLine().getStatusCode()!=HttpStatus.SC_NOT_FOUND 
+					&& response.getStatusLine().getStatusCode()>399
+					){
+				throw new ApiException(response);
 			}
 			return handler.response(response);
-		} catch (IOException  e) {
-			throw new RetryException(e);
+		}catch (IOException e){
+			throw new IllegalArgumentException(e);
 		}finally{
 			if(response!=null){
 				try{response.close();}catch(Exception e){};

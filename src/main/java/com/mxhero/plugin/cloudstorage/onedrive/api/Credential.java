@@ -60,9 +60,6 @@ public class Credential {
 	/** The user. */
 	private String user;
 	
-	/** The expires in. */
-	private Integer expiresIn;
-	
 	/** The listener. */
 	private TokenRefreshListener listener;
 	
@@ -118,24 +115,6 @@ public class Credential {
 	 */
 	public void setUserId(String userId) {
 		this.userId = userId;
-	}
-
-	/**
-	 * Gets the expires in.
-	 *
-	 * @return the expires in
-	 */
-	public Integer getExpiresIn() {
-		return expiresIn;
-	}
-
-	/**
-	 * Sets the expires in.
-	 *
-	 * @param expiresIn the new expires in
-	 */
-	public void setExpiresIn(Integer expiresIn) {
-		this.expiresIn = expiresIn;
 	}
 
 	/**
@@ -220,8 +199,6 @@ public class Credential {
 				"userId may not be blank");
 		Validate.isTrue(!StringUtils.isBlank(accessToken),
 				"accessToken may not be blank");
-		Validate.isTrue(!StringUtils.isBlank(refreshToken),
-				"refreshToken may not be blank");
 	}
 
 	/* (non-Javadoc)
@@ -306,17 +283,6 @@ public class Credential {
 		 */
 		public Builder scope(String scope){
 			this.instance.scope = scope;
-			return this;
-		}
-		
-		/**
-		 * Expires in.
-		 *
-		 * @param expiresIn the expires in
-		 * @return the builder
-		 */
-		public Builder expiresIn(Integer expiresIn){
-			this.instance.expiresIn = expiresIn;
 			return this;
 		}
 		

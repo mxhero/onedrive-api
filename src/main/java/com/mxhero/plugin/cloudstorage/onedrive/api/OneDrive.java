@@ -78,6 +78,7 @@ public class OneDrive {
 	/** The drives. */
 	private Drives drives;
 	
+	/** The items. */
 	private Items items;
 	
 	/**
@@ -151,6 +152,15 @@ public class OneDrive {
 	 */
 	public Items items(){
 		return items;
+	}
+	
+	/**
+	 * Credential.
+	 *
+	 * @return the credential
+	 */
+	public Credential credential(){
+		return this.credential;
 	}
 	
 	/**

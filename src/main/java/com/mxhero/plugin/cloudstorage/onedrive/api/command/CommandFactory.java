@@ -29,8 +29,6 @@ package com.mxhero.plugin.cloudstorage.onedrive.api.command;
  * #L%
  */
 
-
-import java.lang.reflect.Proxy;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.Validate;
@@ -44,7 +42,7 @@ import com.mxhero.plugin.cloudstorage.onedrive.api.ApiEnviroment;
 import com.mxhero.plugin.cloudstorage.onedrive.api.Application;
 
 /**
- * A factory for creating RetryCommand objects.
+ * A factory for creating RefreshCommand objects.
  */
 public class CommandFactory {
 
@@ -75,12 +73,8 @@ public class CommandFactory {
 	 * @param <T> the generic type
 	 * @return the command
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> Command<T> create(){
-		return (Command<T>) Proxy.newProxyInstance(
-				Command.class.getClassLoader(),
-                new Class[] { Command.class },
-                new RetryInvocationHandler<T>(new RetryCommand<T>(httpClientBuilder(),application,credential)));
+		return new RefreshCommand<T>(httpClientBuilder(),application,credential);
 	}
 	
 	/**
@@ -98,7 +92,7 @@ public class CommandFactory {
 	 *
 	 * @return the closeable http client
 	 */
-	protected HttpClientBuilder httpClientBuilder() {
+	public HttpClientBuilder httpClientBuilder() {
 		RequestConfig requestConfig = RequestConfig
 				.custom()
 				.setConnectionRequestTimeout(
@@ -111,6 +105,8 @@ public class CommandFactory {
 						Integer.parseInt(ApiEnviroment.socketTimeout.getValue()))
 				.build();
 		return HttpClientBuilder.create()
+				.setRetryHandler(new HttpRequestRetryHandler())
+				.setServiceUnavailableRetryStrategy(new ServiceUnavailableRetryStrategy())
 				.setDefaultRequestConfig(requestConfig)
 				.setConnectionManager(connManager);
 	}
@@ -123,4 +119,5 @@ public class CommandFactory {
 		connManager.closeIdleConnections(5, TimeUnit.SECONDS);
 		connManager.shutdown();
 	}
+	
 }

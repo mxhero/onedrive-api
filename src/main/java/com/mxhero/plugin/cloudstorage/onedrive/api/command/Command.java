@@ -42,7 +42,6 @@ public interface Command<T> {
 	 * @param handler the handler
 	 * @return the t
 	 */
-	@RetryMethod
 	public T excecute(CommandHandler<T> handler);
 	
 	/**

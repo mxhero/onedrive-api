@@ -53,7 +53,10 @@ public enum ApiEnviroment {
 	socketTimeout("ONEDRIVE_SOCKET_TIMEOUT", "onedrive.socket.timeout","30000"),
 	
 	/** The retries. */
-	retries("ONEDRIVE_RETRIES", "onedrive.retries","5");
+	retries("ONEDRIVE_RETRIES", "onedrive.retries","5"),
+	
+	/** The temp upload folder. */
+	tempUploadFolder("ONEDRIVE_TMP_UPLOAD_FOLDER", "onedrive.tmp.upload.folder", System.getProperty("java.io.tmpdir"));
 
 	/** The enviroment. */
 	private String enviroment;
