@@ -2,7 +2,7 @@
 
 OneDrive-Api is a http client for java backends that want to use OneDrive Api from Microsoft (https://dev.onedrive.com/README.htm)
 
-  - Has an auto-refresh mechanism implemented on every call
+  - Has an auto-refresh mechanism, is activated when refreshToken is provided
   - Amount of retries, timeouts, and more are easy configurable using either enviroment variables or system properties.
   - Suports OneDrive for indivual but for business is coming soon.
 
@@ -31,7 +31,7 @@ new OneDrive.Builder()
 				.application(new Application("YOUR_CLIENT_ID", "YOUR_REDIRECT_URI", "YOUR_CLIENT_SECRETE"))
 				.credential(new Credential.Builder()
 					.accessToken("ACCESS_TOKEN")
-					.refreshToken("REFRESH_TOKEN")
+					.refreshToken("REFRESH_TOKEN") //optional, if not present wont try to refresh access tokens
 					.user("USER_EMAIL")
 					.userId("USER_ID")
 					.build())
@@ -134,12 +134,12 @@ If you have any doubt please contact mmarmol at mxhero.com
 Todos
 ----
 
- - Add other all upload calls
- - Implement Sync Changes backend
+ - Add all upload calls
+ - Implement SyncChanges backend
  - Api for Business implementation
  - Extend configuration out of enviroment and system properties only
  - Add Code Comments
- - Create public tests (We only have internal only)
+
 
 License
 ----
@@ -159,5 +159,5 @@ Maven Repo
     <dependency>
     	<groupId>org.mxhero.plugin.cloudstorage</groupId>
     	<artifactId>org.mxhero.plugin.cloudstorage.onedriveapi</artifactId>
-    	<version>0.2.15</version>
+    	<version>0.3.0</version>
     </dependency>

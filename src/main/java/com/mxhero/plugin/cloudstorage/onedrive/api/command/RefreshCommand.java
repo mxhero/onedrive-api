@@ -152,6 +152,7 @@ public class RefreshCommand<T> implements Command<T>{
 						logger.warn("error executing listener ON FALIURE for credential "+credential+", ignoring",e);
 					}
 				}
+				throw new ApiException(response);
 			}
 		} catch (IOException  e) {
 			throw new IllegalArgumentException(e);
