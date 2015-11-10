@@ -42,6 +42,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.mxhero.plugin.cloudstorage.onedrive.api.command.ApiException;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.Command;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandFactory;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandHandler;
@@ -484,6 +485,9 @@ public class Items {
 					if(response.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
 						return OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), ThumbnailSetList.class);
 					}
+					if(response.getStatusLine().getStatusCode()>399){
+						throw new ApiException(response);
+					}
 					throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 				} catch (Exception e) {
 					throw new IllegalArgumentException("error reading response",e);
@@ -521,6 +525,9 @@ public class Items {
 				try {
 					if(response.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
 						return OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), Item.class);
+					}
+					if(response.getStatusLine().getStatusCode()>399){
+						throw new ApiException(response);
 					}
 					throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 				} catch (Exception e) {
@@ -562,6 +569,9 @@ public class Items {
 			public String response(HttpResponse response) {
 				if(response.getStatusLine().getStatusCode()==HttpStatus.SC_ACCEPTED){
 					return response.getFirstHeader("Location").getValue();
+				}
+				if(response.getStatusLine().getStatusCode()>399){
+					throw new ApiException(response);
 				}
 				throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 			}
@@ -606,6 +616,9 @@ public class Items {
 				if(response.getStatusLine().getStatusCode()==HttpStatus.SC_MOVED_TEMPORARILY){
 					return response.getFirstHeader("Location").getValue();
 				}
+				if(response.getStatusLine().getStatusCode()>399){
+					throw new ApiException(response);
+				}
 				throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 			}
 			
@@ -634,6 +647,9 @@ public class Items {
 					if(response.getStatusLine().getStatusCode()==HttpStatus.SC_CREATED
 							|| response.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
 						return OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), Item.class);
+					}
+					if(response.getStatusLine().getStatusCode()>399){
+						throw new ApiException(response);
 					}
 					throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 				} catch (Exception e) {
@@ -677,6 +693,9 @@ public class Items {
 				try {
 					if(response.getStatusLine().getStatusCode()==HttpStatus.SC_CREATED){
 						return OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), Item.class);
+					}
+					if(response.getStatusLine().getStatusCode()>399){
+						throw new ApiException(response);
 					}
 					throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 				} catch (Exception e) {
@@ -724,6 +743,9 @@ public class Items {
 				try {
 					if(response.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
 						return OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), Item.class);
+					}
+					if(response.getStatusLine().getStatusCode()>399){
+						throw new ApiException(response);
 					}
 					throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 				} catch (Exception e) {
@@ -790,6 +812,8 @@ public class Items {
 						return null;
 					}else if(response.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
 						return OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), ItemList.class);
+					}else if(response.getStatusLine().getStatusCode()>399){
+						throw new ApiException(response);
 					}
 					throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 				} catch (Exception e) {
@@ -833,6 +857,8 @@ public class Items {
 					}else if(response.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
 						String value = EntityUtils.toString(response.getEntity());
 						return OneDrive.JACKSON.readValue(value, Item.class);
+					}else if(response.getStatusLine().getStatusCode()>399){
+						throw new ApiException(response);
 					}
 					throw new IllegalArgumentException("error reading response body with code "+response.getStatusLine().getStatusCode());
 				} catch (Exception e) {
