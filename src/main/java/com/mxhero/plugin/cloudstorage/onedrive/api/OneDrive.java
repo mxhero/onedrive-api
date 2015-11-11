@@ -31,6 +31,7 @@ package com.mxhero.plugin.cloudstorage.onedrive.api;
 
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.Validate;
@@ -44,10 +45,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jackson.map.DeserializationConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandFactory;
 
@@ -90,16 +91,57 @@ public class OneDrive {
 	 * @param clientSecret the client secret
 	 * @return the map
 	 */
-	@SuppressWarnings("unchecked")
 	public static Map<String, Object> redeem(String code, String clientId, String redirectUri, String clientSecret){
+		List<BasicNameValuePair> params = buildParams(code, clientId, redirectUri, clientSecret);
+		params.add(new BasicNameValuePair("grant_type","authorization_code"));
+		return redeemNow(params);
+	}
+
+	/**
+	 * Redeem business.
+	 *
+	 * @param resourceId the resource id
+	 * @param code the code
+	 * @param clientId the client id
+	 * @param redirectUri the redirect uri
+	 * @param clientSecret the client secret
+	 * @return the map
+	 */
+	public static Map<String, Object> redeemBusiness(String resourceId, String code, String clientId, String redirectUri, String clientSecret){
+		List<BasicNameValuePair> params = buildParams(code, clientId, redirectUri, clientSecret);
+		params.add(new BasicNameValuePair("resource",resourceId));
+		return redeemNow(params);
+	}
+
+	/**
+	 * Builds the params.
+	 *
+	 * @param code the code
+	 * @param clientId the client id
+	 * @param redirectUri the redirect uri
+	 * @param clientSecret the client secret
+	 * @return the list
+	 */
+	private static List<BasicNameValuePair> buildParams(String code, String clientId, String redirectUri,String clientSecret) {
+		List<BasicNameValuePair> params = Arrays.asList(
+				new BasicNameValuePair("client_id", clientId)
+				,new BasicNameValuePair("redirect_uri", redirectUri)
+				,new BasicNameValuePair("client_secret",clientSecret)
+				,new BasicNameValuePair("code",code));
+		return params;
+	}
+
+	/**
+	 * Redeem now.
+	 *
+	 * @param params the params
+	 * @return the map
+	 */
+	@SuppressWarnings("unchecked")
+	private static Map<String, Object> redeemNow(List<BasicNameValuePair> params) {
 		try{
 			HttpPost httpPost = new HttpPost(ApiEnviroment.tokenBaseUrl.getValue());		
-			httpPost.setEntity(new UrlEncodedFormEntity(Arrays.asList(
-					new BasicNameValuePair("client_id", clientId)
-					,new BasicNameValuePair("redirect_uri", redirectUri)
-					,new BasicNameValuePair("client_secret",clientSecret)
-					,new BasicNameValuePair("code",code)
-					,new BasicNameValuePair("grant_type","authorization_code"))));
+			httpPost.setEntity(new UrlEncodedFormEntity(params));
 			HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
 			String responseString = EntityUtils.toString(response.getEntity());
 			logger.info(responseString);
