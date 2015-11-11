@@ -4,7 +4,14 @@ OneDrive-Api is a http client for java backends that want to use OneDrive Api fr
 
   - Has an auto-refresh mechanism, is activated when refreshToken is provided
   - Amount of retries, timeouts, and more are easy configurable using either enviroment variables or system properties.
-  - Suports OneDrive for indivual but for business is coming soon.
+  
+## OneDrive for Business Api
+
+We have just implemented Support for Business Api. In particular we have implemented some of the restrictions this Api has compared with Individual Users Api. Check [here](https://dev.onedrive.com/odb-preview/release-notes.htm#uploading-items)
+
+  - [Authentication for Business Api](https://dev.onedrive.com/odb-preview/release-notes.htm#authentication) it is only implemented partially in this Api, only redeem part which has an extra parameter which is ```resource```. 
+  - Handshaking for obtain first code OAuth2 param should be let by implementations. Check here for more information go [here](https://dev.onedrive.com/auth/aad_oauth.htm#register-your-app-with-azure-active-directory)
+
 
 Usage
 ----
@@ -24,6 +31,21 @@ Will return:
   "refresh_token":"eyJh...9323"
 }
 ```
+
+##### Business Redeem
+
+```
+OneDrive.redeemBusiness("RESOURCE_ID", "REDEEM_CODE", "YOUR_CLIENT_ID", "YOUR_REDIRECT_URI", "YOUR_CLIENT_SECRETE");
+```
+Will return:
+```
+{
+  "expires_in": 3600,
+  "access_token":"EwCo...AA==",
+  "refresh_token":"eyJh...9323"
+}
+```
+
 
 #### Create Instance
 ```
