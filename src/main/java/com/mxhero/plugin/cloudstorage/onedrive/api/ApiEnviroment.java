@@ -42,6 +42,9 @@ public enum ApiEnviroment {
 	
 	/** The token base url. */
 	tokenBaseUrl("ONEDRIVE_BASE_URL", "onedrive.base.url","https://login.live.com/oauth20_token.srf"),
+	
+	/** The token business base url. */
+	tokenBusinessBaseUrl("ONEDRIVE_BUSINESS_BASE_URL", "onedrive.business.base.url","https://login.microsoftonline.com/common/oauth2/token"),
 		
 	/** The connection request timeout. */
 	connectionRequestTimeout("ONEDRIVE_REQUEST_TIMEOUT", "onedrive.request.timeout","30000"),
