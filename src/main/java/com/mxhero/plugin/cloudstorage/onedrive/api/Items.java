@@ -61,7 +61,7 @@ public class Items {
 	private static Logger logger = LoggerFactory.getLogger(Items.class);
 	
 	/** The Constant RESERVED_CHARACTERS_PATTERN. */
-	public static final String RESERVED_CHARACTERS_PATTERN = "[/\\*<>?:|#%]";
+	public static final String RESERVED_CHARACTERS_PATTERN = "[/\\*<>?:|#%\"]";
 	
 	/** The Constant DRIVE_ITEMS. */
 	public static final String DRIVE_ITEMS = "/drive/items/";

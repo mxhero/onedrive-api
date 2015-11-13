@@ -159,5 +159,5 @@ Maven Repo
     <dependency>
     	<groupId>org.mxhero.plugin.cloudstorage</groupId>
     	<artifactId>org.mxhero.plugin.cloudstorage.onedriveapi</artifactId>
-    	<version>0.3.2</version>
+    	<version>0.3.3</version>
     </dependency>
