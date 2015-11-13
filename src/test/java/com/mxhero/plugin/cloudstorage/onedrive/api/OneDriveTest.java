@@ -37,7 +37,6 @@ import com.mxhero.plugin.cloudstorage.onedrive.api.model.ItemReference;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.Permission;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.ThumbnailSetList;
 
-
 public class OneDriveTest {
 	
 	private TestEnviroment testEnviroment;
@@ -128,8 +127,7 @@ public class OneDriveTest {
 	@Test
 	public void getItemById(){
 		assumeNotNull(testEnviroment);
-
-		Item item =createApi().items().metadataById("BF667A0C62207823!105");
+		Item item =createApi().items().metadataById("BF667A0C62207823!1912");
 		assertNotNull(item);
 		System.out.println(item.toString());
 	}
@@ -139,11 +137,11 @@ public class OneDriveTest {
 		assumeNotNull(testEnviroment);
 
 		Items items = createApi().items();
-		Item item =items.metadataById("BF667A0C62207823!105", new Parameters().select("id,name"));
+		Item item =items.metadataById("BF667A0C62207823!1912", new Parameters().select("id,name"));
 		assertNotNull(item.getName());
 		assertNull(item.getcTag());
 		System.out.println(item.toString());		
-		item=items.metadataById("BF667A0C62207823!105", new Parameters().expand("children(select=id,name)").select("id,name,children"));
+		item=items.metadataById("BF667A0C62207823!1912", new Parameters().expand("children(select=id,name)").select("id,name,children"));
 		assertNotNull(item.getChildren());
 		System.out.println(item.toString());	
 	}
@@ -153,10 +151,10 @@ public class OneDriveTest {
 		assumeNotNull(testEnviroment);
 
 		Items items = createApi().items();
-		Item item = items.metadataByPath("Documents/richard_shapiro_001_1_1_1.pst");
+		Item item = items.metadataByPath("demo");
 		assertNotNull(item);
 		System.out.println(item.toString());
-		item = items.metadataByPath("Documents/one test");
+		item = items.metadataByPath("demo/saveAndShare");
 		assertNotNull(item);
 		System.out.println(item.toString());
 	}
@@ -175,9 +173,9 @@ public class OneDriveTest {
 	public void thumbnails(){
 		assumeNotNull(testEnviroment);
 
-		ThumbnailSetList list = createApi().items().thumbnails("BF667A0C62207823!115", null);	
-		assertTrue(list.getValue().size()>0);
+		ThumbnailSetList list = createApi().items().thumbnails("BF667A0C62207823!104", null);	
 		System.out.println(list);
+		assertTrue(list.getValue().size()>0);
 	}
 	
 	@Test

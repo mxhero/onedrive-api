@@ -183,6 +183,11 @@ public class RefreshCommand<T> implements Command<T>{
 					&& response.getStatusLine().getStatusCode()>399
 					){
 				throw new ApiException(response);
+			}else if(response.getStatusLine().getStatusCode()==HttpStatus.SC_NOT_FOUND
+					&& response.getFirstHeader("WWW-Authenticate")!=null
+					&& response.getFirstHeader("WWW-Authenticate").getValue()!=null
+					&& response.getFirstHeader("WWW-Authenticate").getValue().contains("expired_token")){
+				throw new AuthenticationException("401 for "+credential.getUserId());
 			}
 			return handler.response(response);
 		}catch (IOException e){

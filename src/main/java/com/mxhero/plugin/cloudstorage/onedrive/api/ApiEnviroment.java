@@ -55,6 +55,9 @@ public enum ApiEnviroment {
 	/** The retries. */
 	retries("ONEDRIVE_RETRIES", "onedrive.retries","5"),
 	
+	/** The max file and folder lenght. */
+	maxFileAndFolderLenght("ONEDRIVE_MAX_FILE_AND_FOLDER_LENGHT", "onedrive.max.file.and.folder.lenght","128"),
+	
 	/** The temp upload folder. */
 	tempUploadFolder("ONEDRIVE_TMP_UPLOAD_FOLDER", "onedrive.tmp.upload.folder", System.getProperty("java.io.tmpdir"));
 

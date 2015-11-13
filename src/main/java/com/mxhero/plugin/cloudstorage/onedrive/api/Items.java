@@ -147,7 +147,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item metadataByPath(String path, Parameters odata){
-		return this.itemGet(DRIVE_ROOT+((StringUtils.isNotBlank(cleanAndEncodePath(path)))?":/"+path:""),odata);
+		return this.itemGet(DRIVE_ROOT+((StringUtils.isNotBlank(path))?":/"+cleanAndEncodePath(path):""),odata);
 	}
 	
 	/**
@@ -266,7 +266,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadByPath(String path, String name, InputStream inputStream, ConflictBehavior conflictBehavior){
-		return simpleUploadStream(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+"/"+cleanAndEncodePath(name)+":"+CONTENT, inputStream, conflictBehavior);
+		return simpleUploadStream(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+"/"+cleanAndEncodeAndShortPath(name)+":"+CONTENT, inputStream, conflictBehavior);
 	}
 	
 	/**
@@ -279,7 +279,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadByPath(String path, String name, File file, ConflictBehavior conflictBehavior){
-		return simpleUpload(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+"/"+cleanAndEncodePath(name)+":"+CONTENT, file, conflictBehavior);
+		return simpleUpload(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+"/"+cleanAndEncodeAndShortPath(name)+":"+CONTENT, file, conflictBehavior);
 	}
 	
 	/**
@@ -292,7 +292,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadById(String parentId, String name, InputStream inputStream, ConflictBehavior conflictBehavior){
-		return simpleUploadStream(DRIVE_ITEMS+parentId+CHILDREN+"/"+cleanAndEncodePath(name)+CONTENT, inputStream, conflictBehavior);
+		return simpleUploadStream(DRIVE_ITEMS+parentId+CHILDREN+"/"+cleanAndEncodeAndShortPath(name)+CONTENT, inputStream, conflictBehavior);
 	}
 	
 	/**
@@ -305,7 +305,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadById(String parentId, String name, File file, ConflictBehavior conflictBehavior){
-		return simpleUpload(DRIVE_ITEMS+parentId+CHILDREN+"/"+cleanAndEncodePath(name)+CONTENT, file, conflictBehavior);
+		return simpleUpload(DRIVE_ITEMS+parentId+CHILDREN+"/"+cleanAndEncodeAndShortPath(name)+CONTENT, file, conflictBehavior);
 	}
 
 	/**
@@ -714,7 +714,7 @@ public class Items {
 				HttpPost httpPost = new HttpPost(postUrl);
 				httpPost.setHeader("Content-type", "application/json");
 				Map<String, Object> item = new HashMap<>();
-				item.put("name", name.replaceAll(Items.RESERVED_CHARACTERS_PATTERN, " ").trim());
+				item.put("name", cleanAndEncodeAndShortPath(name));
 				item.put("folder", new HashMap<>());
 				item.put("@name.conflictBehavior", conflictBehavior.name());
 				try {
@@ -897,6 +897,23 @@ public class Items {
 				}
 			}
 			return cleanPath.substring(0,cleanPath.length()-1);
+		}
+		return null;
+	}
+	
+	/**
+	 * Clean and encode and short path.
+	 *
+	 * @param path the path
+	 * @return the string
+	 */
+	public static String cleanAndEncodeAndShortPath(String path){
+		if(path!=null){
+			String processedPath = cleanAndEncodePath(path);
+			if(processedPath.length()>Integer.parseInt(ApiEnviroment.maxFileAndFolderLenght.getValue())){
+				processedPath = processedPath.substring(0, Integer.parseInt(ApiEnviroment.maxFileAndFolderLenght.getValue()));
+			}
+			return processedPath;
 		}
 		return null;
 	}
