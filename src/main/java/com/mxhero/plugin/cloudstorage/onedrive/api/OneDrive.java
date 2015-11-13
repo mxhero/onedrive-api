@@ -15,22 +15,7 @@
  */
 package com.mxhero.plugin.cloudstorage.onedrive.api;
 
-/*
- * #%L
- * com.mxhero.plugin.cloudstorage.onedrive
- * %%
- * Copyright (C) 2013 - 2015 mxHero Inc.
- * %%
- * MXHERO END USER LICENSE AGREEMENT
- * 
- * IMPORTANT-READ CAREFULLY:  BY DOWNLOADING, INSTALLING, OR USING THE SOFTWARE, YOU (THE INDIVIDUAL OR LEGAL ENTITY) AGREE TO BE BOUND BY THE TERMS OF THIS END USER LICENSE AGREEMENT (EULA).  IF YOU DO NOT AGREE TO THE TERMS OF THIS EULA, YOU MUST NOT DOWNLOAD, INSTALL, OR USE THE SOFTWARE, AND YOU MUST DELETE OR RETURN THE UNUSED SOFTWARE TO THE VENDOR FROM WHICH YOU ACQUIRED IT WITHIN THIRTY (30) DAYS AND REQUEST A REFUND OF THE LICENSE FEE, IF ANY, THAT YOU PAID FOR THE SOFTWARE.
- * 
- * READ LICENSE.txt file to see details of this agreement.
- * #L%
- */
-
-
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -109,6 +94,7 @@ public class OneDrive {
 	 */
 	public static Map<String, Object> redeemBusiness(String resourceId, String code, String clientId, String redirectUri, String clientSecret){
 		List<BasicNameValuePair> params = buildParams(code, clientId, redirectUri, clientSecret);
+		params.add(new BasicNameValuePair("grant_type","authorization_code"));
 		params.add(new BasicNameValuePair("resource",resourceId));
 		return redeemNow(params);
 	}
@@ -123,11 +109,11 @@ public class OneDrive {
 	 * @return the list
 	 */
 	private static List<BasicNameValuePair> buildParams(String code, String clientId, String redirectUri,String clientSecret) {
-		List<BasicNameValuePair> params = Arrays.asList(
-				new BasicNameValuePair("client_id", clientId)
-				,new BasicNameValuePair("redirect_uri", redirectUri)
-				,new BasicNameValuePair("client_secret",clientSecret)
-				,new BasicNameValuePair("code",code));
+		List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+		params.add(new BasicNameValuePair("client_id", clientId));
+		params.add(new BasicNameValuePair("redirect_uri", redirectUri));
+		params.add(new BasicNameValuePair("client_secret",clientSecret));
+		params.add(new BasicNameValuePair("code",code));
 		return params;
 	}
 
@@ -140,7 +126,7 @@ public class OneDrive {
 	@SuppressWarnings("unchecked")
 	private static Map<String, Object> redeemNow(List<BasicNameValuePair> params) {
 		try{
-			HttpPost httpPost = new HttpPost(ApiEnviroment.tokenBaseUrl.getValue());		
+			HttpPost httpPost = new HttpPost(ApiEnviroment.tokenBusinessBaseUrl.getValue());		
 			httpPost.setEntity(new UrlEncodedFormEntity(params));
 			HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
 			String responseString = EntityUtils.toString(response.getEntity());
