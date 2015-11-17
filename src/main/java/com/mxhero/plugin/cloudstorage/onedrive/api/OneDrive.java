@@ -77,7 +77,8 @@ public class OneDrive {
 	 * @return the map
 	 */
 	public static Map<String, Object> redeem(String code, String clientId, String redirectUri, String clientSecret){
-		List<BasicNameValuePair> params = buildParams(code, clientId, redirectUri, clientSecret);
+		List<BasicNameValuePair> params = buildParams(clientId, redirectUri, clientSecret);
+		params.add(new BasicNameValuePair("code",code));
 		params.add(new BasicNameValuePair("grant_type","authorization_code"));
 		return redeemNow(params);
 	}
@@ -92,9 +93,28 @@ public class OneDrive {
 	 * @param clientSecret the client secret
 	 * @return the map
 	 */
-	public static Map<String, Object> redeemBusiness(String resourceId, String code, String clientId, String redirectUri, String clientSecret){
-		List<BasicNameValuePair> params = buildParams(code, clientId, redirectUri, clientSecret);
+	public static Map<String, Object> redeemDiscovery(String resourceId, String code, String clientId, String redirectUri, String clientSecret){
+		List<BasicNameValuePair> params = buildParams(clientId, redirectUri, clientSecret);
+		params.add(new BasicNameValuePair("code",code));
 		params.add(new BasicNameValuePair("grant_type","authorization_code"));
+		params.add(new BasicNameValuePair("resource",resourceId));
+		return redeemNow(params);
+	}
+
+	/**
+	 * Redeem business api.
+	 *
+	 * @param resourceId the resource id
+	 * @param clientId the client id
+	 * @param redirectUri the redirect uri
+	 * @param clientSecret the client secret
+	 * @param refreshToken the refresh token
+	 * @return the map
+	 */
+	public static Map<String, Object> redeemBusinessApi(String resourceId, String clientId, String redirectUri, String clientSecret, String refreshToken){
+		List<BasicNameValuePair> params = buildParams(clientId, redirectUri, clientSecret);
+		params.add(new BasicNameValuePair("refresh_token",refreshToken));
+		params.add(new BasicNameValuePair("grant_type","refresh_token"));
 		params.add(new BasicNameValuePair("resource",resourceId));
 		return redeemNow(params);
 	}
@@ -105,15 +125,13 @@ public class OneDrive {
 	 * @param code the code
 	 * @param clientId the client id
 	 * @param redirectUri the redirect uri
-	 * @param clientSecret the client secret
 	 * @return the list
 	 */
-	private static List<BasicNameValuePair> buildParams(String code, String clientId, String redirectUri,String clientSecret) {
+	private static List<BasicNameValuePair> buildParams(String clientId, String redirectUri, String clientSecret) {
 		List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 		params.add(new BasicNameValuePair("client_id", clientId));
 		params.add(new BasicNameValuePair("redirect_uri", redirectUri));
 		params.add(new BasicNameValuePair("client_secret",clientSecret));
-		params.add(new BasicNameValuePair("code",code));
 		return params;
 	}
 
