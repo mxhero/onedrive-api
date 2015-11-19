@@ -348,7 +348,7 @@ public class Items {
 	 * @return the string
 	 */
 	public String copyById(String id, ItemReference parentReference, String name){
-		return postCopy(DRIVE_ITEMS+id+COPY,parentReference,cleanAndEncodePath(name));
+		return postCopy(DRIVE_ITEMS+id+COPY,parentReference,name);
 	}
 	
 	/**
@@ -714,7 +714,7 @@ public class Items {
 				HttpPost httpPost = new HttpPost(postUrl);
 				httpPost.setHeader("Content-type", "application/json");
 				Map<String, Object> item = new HashMap<>();
-				item.put("name", cleanAndEncodeAndShortPath(name));
+				item.put("name", cleanAndShortName(name));
 				item.put("folder", new HashMap<>());
 				item.put("@name.conflictBehavior", conflictBehavior.name());
 				try {
@@ -897,6 +897,23 @@ public class Items {
 				}
 			}
 			return cleanPath.substring(0,cleanPath.length()-1);
+		}
+		return null;
+	}
+	
+	/**
+	 * Clean and short name.
+	 *
+	 * @param path the path
+	 * @return the string
+	 */
+	public static String cleanAndShortName(String path){
+		if(path!=null){
+			String processedPath = path.replaceAll(RESERVED_CHARACTERS_PATTERN, " ").trim();
+			if(processedPath.length()>Integer.parseInt(ApiEnviroment.maxFileAndFolderLenght.getValue())){
+				processedPath = processedPath.substring(0, Integer.parseInt(ApiEnviroment.maxFileAndFolderLenght.getValue()));
+			}
+			return processedPath;
 		}
 		return null;
 	}

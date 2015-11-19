@@ -287,6 +287,7 @@ public class OneDriveTest {
 		System.out.println(items.deleteByPath("folder"));
 		System.out.println(items.createFolder(items.createFolder("root", "folder", ConflictBehavior.rename).getId(), "subfolder", ConflictBehavior.fail));
 		System.out.println(items.deleteByPath("folder"));
+		items.createFolder("root", "marcelo@gmail.com", ConflictBehavior.rename);
 	}
 	
 	@Test
