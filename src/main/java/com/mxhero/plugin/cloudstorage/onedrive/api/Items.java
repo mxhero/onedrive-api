@@ -136,7 +136,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item metadataByPath(String path){
-		return this.metadataByPath(cleanAndEncodePath(path),null);
+		return this.metadataByPath(path,null);
 	}
 	
 	/**
@@ -178,7 +178,7 @@ public class Items {
 	 * @return the item list
 	 */
 	public ItemList childrenByPath(String path){
-		return this.childrenByPath(cleanAndEncodePath(path),null);
+		return this.childrenByPath(path,null);
 	}
 	
 	/**
@@ -189,7 +189,7 @@ public class Items {
 	 * @return the item list
 	 */
 	public ItemList childrenByPath(String path, Parameters odata){
-		return this.itemListGet(DRIVE_ROOT+((StringUtils.isNotBlank(cleanAndEncodePath(path)))?(":/"+path+":"):"")+CHILDREN, odata);
+		return this.itemListGet(DRIVE_ROOT+((StringUtils.isNotBlank(path))?(":/"+cleanAndEncodePath(path)+":"):"")+CHILDREN, odata);
 	}
 	
 	/**
@@ -200,7 +200,7 @@ public class Items {
 	 * @return the item list
 	 */
 	public ItemList searchByPath(String path, Parameters odata){
-		return this.itemListGet(DRIVE_ROOT+((StringUtils.isNotBlank(cleanAndEncodePath(path)))?(":/"+path+":/"):"")+SEARCH, odata);		
+		return this.itemListGet(DRIVE_ROOT+((StringUtils.isNotBlank(path))?(":/"+cleanAndEncodePath(path)+":/"):"")+SEARCH, odata);		
 	}
 	
 	/**
