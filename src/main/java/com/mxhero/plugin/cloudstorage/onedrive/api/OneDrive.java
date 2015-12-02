@@ -144,9 +144,9 @@ public class OneDrive {
 	/**
 	 * Builds the params.
 	 *
+	 * @param code the code
 	 * @param clientId the client id
 	 * @param redirectUri the redirect uri
-	 * @param clientSecret the client secret
 	 * @return the list
 	 */
 	private static List<BasicNameValuePair> buildParams(String clientId, String redirectUri, String clientSecret) {
