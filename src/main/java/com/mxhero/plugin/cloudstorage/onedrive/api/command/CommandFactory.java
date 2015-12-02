@@ -54,17 +54,33 @@ public class CommandFactory {
 	
 	/** The application. */
 	private Application application;
+
+	/** The base url. */
+	private String baseUrl;
 	
 	/**
 	 * Instantiates a new command factory.
 	 *
+	 * @param application the application
 	 * @param credential the credential
+	 * @param baseUrl the base url
 	 */
-	public CommandFactory(Application application, Credential credential){
+	public CommandFactory(Application application, Credential credential, String baseUrl){
 		Validate.notNull(credential, "credential may not be null");
 		this.credential=credential;
 		this.application=application;
+		this.baseUrl = baseUrl;
 		this.connManager=httpClientConnectionManager();
+	}
+	
+	/**
+	 * Instantiates a new command factory.
+	 *
+	 * @param application the application
+	 * @param credential the credential
+	 */
+	public CommandFactory(Application application, Credential credential){
+		this(application,credential,null);
 	}
 	
 	/**
@@ -74,7 +90,7 @@ public class CommandFactory {
 	 * @return the command
 	 */
 	public <T> Command<T> create(){
-		return new RefreshCommand<T>(httpClientBuilder(),application,credential);
+		return new RefreshCommand<T>(httpClientBuilder(),application,credential,baseUrl);
 	}
 	
 	/**
@@ -118,6 +134,15 @@ public class CommandFactory {
 		connManager.closeExpiredConnections();
 		connManager.closeIdleConnections(5, TimeUnit.SECONDS);
 		connManager.shutdown();
+	}
+
+	/**
+	 * Sets the base url.
+	 *
+	 * @param baseUrl the new base url
+	 */
+	public void setBaseUrl(String baseUrl) {
+		this.baseUrl = baseUrl;
 	}
 	
 }

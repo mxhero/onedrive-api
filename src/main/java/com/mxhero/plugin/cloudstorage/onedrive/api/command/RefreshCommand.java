@@ -78,18 +78,33 @@ public class RefreshCommand<T> implements Command<T>{
 	private String baseUrl = ApiEnviroment.baseUrl.getValue();
 	
 	/**
-	 * Instantiates a new command.
+	 * Instantiates a new refresh command.
 	 *
 	 * @param clientBuilder the client builder
 	 * @param application the application
 	 * @param credential the credential
 	 */
 	public RefreshCommand(HttpClientBuilder clientBuilder, Application application, Credential credential){
+		this(clientBuilder,application,credential,null);
+	}
+	
+	/**
+	 * Instantiates a new command.
+	 *
+	 * @param clientBuilder the client builder
+	 * @param application the application
+	 * @param credential the credential
+	 * @param baseUrl the base url
+	 */
+	public RefreshCommand(HttpClientBuilder clientBuilder, Application application, Credential credential, String baseUrl){
 		Validate.notNull(credential, "credential may not be null");
 		Validate.notNull(clientBuilder, "clientBuilder may not be null");
 		this.credential=credential;
 		this.clientBuilder=clientBuilder;
 		this.application=application;
+		if(StringUtils.isNotEmpty(baseUrl)){
+			this.baseUrl = baseUrl;
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -168,6 +183,7 @@ public class RefreshCommand<T> implements Command<T>{
 	 *
 	 * @param handler the handler
 	 * @return the t
+	 * @throws ApiException the api exception
 	 */
 	private T handlerExecute(CommandHandler<T> handler) throws ApiException{
 		CloseableHttpResponse response = null;
