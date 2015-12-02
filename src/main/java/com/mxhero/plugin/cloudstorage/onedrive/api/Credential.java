@@ -195,8 +195,6 @@ public class Credential {
 	 * Validate.
 	 */
 	private void validate() {
-		Validate.isTrue(!StringUtils.isBlank(userId),
-				"userId may not be blank");
 		Validate.isTrue(!StringUtils.isBlank(accessToken),
 				"accessToken may not be blank");
 	}

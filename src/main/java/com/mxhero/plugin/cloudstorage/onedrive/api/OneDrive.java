@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.commons.lang.Validate;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.auth.AuthenticationException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -36,6 +37,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandFactory;
+import com.mxhero.plugin.cloudstorage.onedrive.api.model.DiscoveryService;
+import com.mxhero.plugin.cloudstorage.onedrive.api.model.DiscoveryServices;
+import com.mxhero.plugin.cloudstorage.onedrive.api.model.OneDriveBusiness;
 
 /**
  * The Class OneDrive.
@@ -86,45 +90,63 @@ public class OneDrive {
 	/**
 	 * Redeem business.
 	 *
-	 * @param resourceId the resource id
 	 * @param code the code
 	 * @param clientId the client id
 	 * @param redirectUri the redirect uri
 	 * @param clientSecret the client secret
-	 * @return the map
+	 * @return the one drive business
+	 * @throws AuthenticationException the authentication exception
 	 */
-	public static Map<String, Object> redeemDiscovery(String resourceId, String code, String clientId, String redirectUri, String clientSecret){
-		List<BasicNameValuePair> params = buildParams(clientId, redirectUri, clientSecret);
-		params.add(new BasicNameValuePair("code",code));
-		params.add(new BasicNameValuePair("grant_type","authorization_code"));
-		params.add(new BasicNameValuePair("resource",resourceId));
-		return redeemNow(params);
+	public static OneDriveBusiness redeemBusiness(String code, String clientId, String redirectUri, String clientSecret) throws AuthenticationException{
+		try {
+			Discovery discovery = new Discovery();
+			logger.debug("Redeem for OneDrive Business API.");
+			Credential credential = discovery.redeemDiscovery(code, clientId, redirectUri, clientSecret);
+			logger.debug("Discovery for OneDrive Business API done sucessfully.");
+			DiscoveryServices services = discovery.services(credential);
+			logger.debug("Discovery Services for OneDrive Business API retrieved {}", services);
+			DiscoveryService oneDriveBusiness = services.oneDriveBusiness();
+			if(oneDriveBusiness != null){			
+				Map<String, Object> redeemBusinessApi = redeemBusinessApi(oneDriveBusiness.getServiceResourceId(), clientId, clientSecret, redirectUri, credential.getRefreshToken());
+				logger.debug("Redeem for OneDrive Business API sharepoint specific URL {}", oneDriveBusiness);
+				return OneDriveBusiness.builder()
+						.credential(OneDrive.JACKSON.convertValue(redeemBusinessApi, Credential.class))
+						.sharepointEndpointUri(oneDriveBusiness.getServiceEndpointUri())
+						.sharepointResourceId(oneDriveBusiness.getServiceResourceId())
+						.build();
+			}else{
+				throw new AuthenticationException("User doesnt have OneDrive Business API enabled");
+			}
+		} catch (Exception e) {
+			throw new AuthenticationException("Could not redeem code "+code+" for Discovery API");			
+		}
 	}
+
 
 	/**
 	 * Redeem business api.
 	 *
-	 * @param resourceId the resource id
+	 * @param sharepointBusinessURI the resource id
 	 * @param clientId the client id
-	 * @param redirectUri the redirect uri
 	 * @param clientSecret the client secret
+	 * @param redirectUri the redirect uri
 	 * @param refreshToken the refresh token
 	 * @return the map
 	 */
-	public static Map<String, Object> redeemBusinessApi(String resourceId, String clientId, String redirectUri, String clientSecret, String refreshToken){
+	private static Map<String, Object> redeemBusinessApi(String sharepointBusinessURI, String clientId, String clientSecret, String redirectUri, String refreshToken){
 		List<BasicNameValuePair> params = buildParams(clientId, redirectUri, clientSecret);
 		params.add(new BasicNameValuePair("refresh_token",refreshToken));
 		params.add(new BasicNameValuePair("grant_type","refresh_token"));
-		params.add(new BasicNameValuePair("resource",resourceId));
+		params.add(new BasicNameValuePair("resource",sharepointBusinessURI));
 		return redeemNow(params);
 	}
 
 	/**
 	 * Builds the params.
 	 *
-	 * @param code the code
 	 * @param clientId the client id
 	 * @param redirectUri the redirect uri
+	 * @param clientSecret the client secret
 	 * @return the list
 	 */
 	private static List<BasicNameValuePair> buildParams(String clientId, String redirectUri, String clientSecret) {
@@ -199,7 +221,7 @@ public class OneDrive {
 	public Items items(){
 		return items;
 	}
-	
+
 	/**
 	 * Credential.
 	 *
@@ -266,6 +288,8 @@ public class OneDrive {
 			instance.items = new Items(instance.commandFactory);
 			return instance;
 		}
+		
+		
 		
 	}
 	

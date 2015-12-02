@@ -62,7 +62,10 @@ public enum ApiEnviroment {
 	maxFileAndFolderLenght("ONEDRIVE_MAX_FILE_AND_FOLDER_LENGHT", "onedrive.max.file.and.folder.lenght","128"),
 	
 	/** The temp upload folder. */
-	tempUploadFolder("ONEDRIVE_TMP_UPLOAD_FOLDER", "onedrive.tmp.upload.folder", System.getProperty("java.io.tmpdir"));
+	tempUploadFolder("ONEDRIVE_TMP_UPLOAD_FOLDER", "onedrive.tmp.upload.folder", System.getProperty("java.io.tmpdir")),
+	
+	/** The discovery resource uri. */
+	discoveryResourceUri("ONEDRIVE_DISCOVERY_URL", "onedrive.discovery.url","https://api.office.com/discovery/");
 
 	/** The enviroment. */
 	private String enviroment;
