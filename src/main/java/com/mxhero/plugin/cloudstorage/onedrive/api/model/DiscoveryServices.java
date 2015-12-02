@@ -29,6 +29,9 @@ public class DiscoveryServices {
 	/** The Constant CAPABILITY. */
 	private static final String CAPABILITY = "MyFiles";
 	
+	/** The Constant CAPABILITY_ROOT. */
+	private static final String CAPABILITY_ROOT = "RootSite";
+	
 	/** The Constant VERSION. */
 	private static final String VERSION = "v2.0";
 	
@@ -76,6 +79,20 @@ public class DiscoveryServices {
 	public DiscoveryService oneDriveBusiness() {
 		for (DiscoveryService discoveryService : value) {
 			if(CAPABILITY.equals(discoveryService.getCapability()) && VERSION.equals(discoveryService.getServiceApiVersion())){
+				return discoveryService;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Root sharepoint.
+	 *
+	 * @return the one drive business
+	 */
+	public DiscoveryService rootSharepoint() {
+		for (DiscoveryService discoveryService : value) {
+			if(CAPABILITY_ROOT.equals(discoveryService.getCapability())){
 				return discoveryService;
 			}
 		}
