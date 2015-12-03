@@ -194,7 +194,7 @@ public class Credential {
 	/**
 	 * Validate.
 	 */
-	private void validate() {
+	protected void validate() {
 		Validate.isTrue(!StringUtils.isBlank(accessToken),
 				"accessToken may not be blank");
 	}
@@ -214,7 +214,11 @@ public class Credential {
 	public static class Builder {
 
 		/** The instance. */
-		private Credential instance = new Credential();
+		protected Credential instance;
+		
+		public Builder() {
+			this.instance = new Credential();
+		}
 
 		/**
 		 * User.

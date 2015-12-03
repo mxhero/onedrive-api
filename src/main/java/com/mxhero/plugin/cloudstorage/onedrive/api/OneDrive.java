@@ -299,9 +299,6 @@ public class OneDrive {
 		/** The instance. */
 		private OneDrive instance = new OneDrive();
 		
-		/** The business url. */
-		private String businessUrl;
-		
 		/**
 		 * Application.
 		 *
@@ -330,8 +327,8 @@ public class OneDrive {
 		 * @param businessUrl the business url
 		 * @return the builder
 		 */
-		public Builder businessUrl(String businessUrl){
-			this.businessUrl = businessUrl;
+		public Builder businessCredential(BusinessCredential credential){
+			this.instance.credential = credential;
 			return this;
 		}
 		
@@ -342,7 +339,7 @@ public class OneDrive {
 		 */
 		public OneDrive build(){
 			instance.validate();
-			instance.commandFactory=new CommandFactory(this.instance.application, this.instance.credential,this.businessUrl);
+			instance.commandFactory=new CommandFactory(this.instance.application, this.instance.credential);
 			instance.drives = new Drives(instance.commandFactory);
 			instance.items = new Items(instance.commandFactory);
 			return instance;

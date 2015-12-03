@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import com.mxhero.plugin.cloudstorage.onedrive.api.Credential;
 import com.mxhero.plugin.cloudstorage.onedrive.api.ApiEnviroment;
 import com.mxhero.plugin.cloudstorage.onedrive.api.Application;
+import com.mxhero.plugin.cloudstorage.onedrive.api.BusinessCredential;
 import com.mxhero.plugin.cloudstorage.onedrive.api.OneDrive;
 
 /**
@@ -78,17 +79,6 @@ public class RefreshCommand<T> implements Command<T>{
 	private String baseUrl = ApiEnviroment.baseUrl.getValue();
 	
 	/**
-	 * Instantiates a new refresh command.
-	 *
-	 * @param clientBuilder the client builder
-	 * @param application the application
-	 * @param credential the credential
-	 */
-	public RefreshCommand(HttpClientBuilder clientBuilder, Application application, Credential credential){
-		this(clientBuilder,application,credential,null);
-	}
-	
-	/**
 	 * Instantiates a new command.
 	 *
 	 * @param clientBuilder the client builder
@@ -96,15 +86,12 @@ public class RefreshCommand<T> implements Command<T>{
 	 * @param credential the credential
 	 * @param baseUrl the base url
 	 */
-	public RefreshCommand(HttpClientBuilder clientBuilder, Application application, Credential credential, String baseUrl){
+	public RefreshCommand(HttpClientBuilder clientBuilder, Application application, Credential credential){
 		Validate.notNull(credential, "credential may not be null");
 		Validate.notNull(clientBuilder, "clientBuilder may not be null");
 		this.credential=credential;
 		this.clientBuilder=clientBuilder;
 		this.application=application;
-		if(StringUtils.isNotEmpty(baseUrl)){
-			this.baseUrl = baseUrl;
-		}
 	}
 	
 	/* (non-Javadoc)
@@ -220,7 +207,11 @@ public class RefreshCommand<T> implements Command<T>{
 	 */
 	@Override
 	public String baseUrl() {
-		return baseUrl;
+		if(credential instanceof BusinessCredential){
+			return ((BusinessCredential)credential).getSharepointEndpointUri();
+		}else{			
+			return baseUrl;
+		}
 	}
 
 }
