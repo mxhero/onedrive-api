@@ -31,6 +31,7 @@ package com.mxhero.plugin.cloudstorage.onedrive.api.command;
 
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -50,10 +52,9 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mxhero.plugin.cloudstorage.onedrive.api.Credential;
 import com.mxhero.plugin.cloudstorage.onedrive.api.ApiEnviroment;
 import com.mxhero.plugin.cloudstorage.onedrive.api.Application;
-import com.mxhero.plugin.cloudstorage.onedrive.api.BusinessCredential;
+import com.mxhero.plugin.cloudstorage.onedrive.api.Credential;
 import com.mxhero.plugin.cloudstorage.onedrive.api.OneDrive;
 
 /**
@@ -84,7 +85,6 @@ public class RefreshCommand<T> implements Command<T>{
 	 * @param clientBuilder the client builder
 	 * @param application the application
 	 * @param credential the credential
-	 * @param baseUrl the base url
 	 */
 	public RefreshCommand(HttpClientBuilder clientBuilder, Application application, Credential credential){
 		Validate.notNull(credential, "credential may not be null");
@@ -118,20 +118,8 @@ public class RefreshCommand<T> implements Command<T>{
 	 */
 	private void refreshToken(){
 		CloseableHttpResponse response = null;
-		CloseableHttpClient client = null;
 		try {
-			client = clientBuilder.build();
-			
-			HttpPost post = new HttpPost(ApiEnviroment.tokenBaseUrl.getValue());
-			post.setHeader("Content-Type", "application/x-www-form-urlencoded");
-			List<NameValuePair> postParams = new ArrayList<>();
-			postParams.add(new BasicNameValuePair("grant_type", "refresh_token"));
-			postParams.add(new BasicNameValuePair("refresh_token", credential.getRefreshToken()));
-			postParams.add(new BasicNameValuePair("redirect_uri", application.getRedirectUri()));
-			postParams.add(new BasicNameValuePair("client_id", application.getClientId()));
-			postParams.add(new BasicNameValuePair("client_secret", application.getClientSecret()));
-			post.setEntity(new UrlEncodedFormEntity(postParams));
-			response = client.execute(post);
+			response = callRefreshToken();
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 				@SuppressWarnings("unchecked")
 				Map<String, Object> result = OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), Map.class);
@@ -163,6 +151,33 @@ public class RefreshCommand<T> implements Command<T>{
 				try{response.close();}catch(Exception e){};
 			}
 		}
+	}
+
+	/**
+	 * Call refresh token.
+	 *
+	 * @return the closeable http response
+	 * @throws UnsupportedEncodingException the unsupported encoding exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws ClientProtocolException the client protocol exception
+	 */
+	public CloseableHttpResponse callRefreshToken()
+			throws UnsupportedEncodingException, IOException, ClientProtocolException {
+		CloseableHttpResponse response;
+		CloseableHttpClient client;
+		client = clientBuilder.build();
+		
+		HttpPost post = new HttpPost(ApiEnviroment.tokenBaseUrl.getValue());
+		post.setHeader("Content-Type", "application/x-www-form-urlencoded");
+		List<NameValuePair> postParams = new ArrayList<>();
+		postParams.add(new BasicNameValuePair("grant_type", "refresh_token"));
+		postParams.add(new BasicNameValuePair("refresh_token", credential.getRefreshToken()));
+		postParams.add(new BasicNameValuePair("redirect_uri", application.getRedirectUri()));
+		postParams.add(new BasicNameValuePair("client_id", application.getClientId()));
+		postParams.add(new BasicNameValuePair("client_secret", application.getClientSecret()));
+		post.setEntity(new UrlEncodedFormEntity(postParams));
+		response = client.execute(post);
+		return response;
 	}
 	
 	/**
@@ -201,17 +216,22 @@ public class RefreshCommand<T> implements Command<T>{
 			}
 		}
 	}
+	
+	/**
+	 * Gets the application.
+	 *
+	 * @return the application
+	 */
+	public Application getApplication() {
+		return application;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.mxhero.plugin.cloudstorage.onedrive.api.command.Command#baseUrl()
 	 */
 	@Override
 	public String baseUrl() {
-		if(credential instanceof BusinessCredential){
-			return ((BusinessCredential)credential).getSharepointEndpointUri();
-		}else{			
-			return baseUrl;
-		}
+		return baseUrl;
 	}
 
 }

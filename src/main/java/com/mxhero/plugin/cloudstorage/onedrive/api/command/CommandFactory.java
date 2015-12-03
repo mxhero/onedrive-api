@@ -40,6 +40,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import com.mxhero.plugin.cloudstorage.onedrive.api.Credential;
 import com.mxhero.plugin.cloudstorage.onedrive.api.ApiEnviroment;
 import com.mxhero.plugin.cloudstorage.onedrive.api.Application;
+import com.mxhero.plugin.cloudstorage.onedrive.api.BusinessCredential;
 
 /**
  * A factory for creating RefreshCommand objects.
@@ -76,7 +77,11 @@ public class CommandFactory {
 	 * @return the command
 	 */
 	public <T> Command<T> create(){
-		return new RefreshCommand<T>(httpClientBuilder(),application,credential);
+		if(credential instanceof BusinessCredential){			
+			return new RefreshBusinessCommand<T>(httpClientBuilder(),application,credential);
+		}else{
+			return new RefreshCommand<T>(httpClientBuilder(),application,credential);
+		}
 	}
 	
 	/**

@@ -27,6 +27,9 @@ public class BusinessCredential extends Credential {
 	
 	/** The sharepoint url. */
 	private String sharepointEndpointUri;
+	
+	/** The sharepoint resource id. */
+	private String sharepointResourceId;
 
 	/**
 	 * Gets the sharepoint endpoint uri.
@@ -46,6 +49,25 @@ public class BusinessCredential extends Credential {
 		this.sharepointEndpointUri = sharepointEndpointUri;
 	}
 	
+	
+	/**
+	 * Builder.
+	 *
+	 * @return the builder
+	 */
+	public static BuilderBusiness builder(){
+		return new BuilderBusiness();
+	}
+	
+	/**
+	 * Gets the sharepoint resource id.
+	 *
+	 * @return the sharepoint resource id
+	 */
+	public String getSharepointResourceId() {
+		return sharepointResourceId;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -62,17 +84,19 @@ public class BusinessCredential extends Credential {
 		super.validate();
 		Validate.isTrue(!StringUtils.isBlank(sharepointEndpointUri),
 				"sharepointEndpointUri may not be blank in business Credential");
+		Validate.isTrue(!StringUtils.isBlank(sharepointResourceId),
+				"sharepointResourceId may not be blank in business Credential");
 	}
-	
+
 	/**
-	 * Builder.
+	 * Sets the sharepoint resource id.
 	 *
-	 * @return the builder
+	 * @param sharepointResourceId the new sharepoint resource id
 	 */
-	public static BuilderBusiness builder(){
-		return new BuilderBusiness();
+	public void setSharepointResourceId(String sharepointResourceId) {
+		this.sharepointResourceId = sharepointResourceId;
 	}
-	
+
 	/**
 	 * The Class BuilderBusiness.
 	 */
@@ -93,6 +117,17 @@ public class BusinessCredential extends Credential {
 		 */
 		public BuilderBusiness sharepointEndpointUri(String uri){
 			((BusinessCredential)this.instance).sharepointEndpointUri = uri;
+			return this;
+		}
+		
+		/**
+		 * Sharepoint resource id.
+		 *
+		 * @param sharepointResourceId the sharepoint resource id
+		 * @return the builder business
+		 */
+		public BuilderBusiness sharepointResourceId(String sharepointResourceId){
+			((BusinessCredential)this.instance).sharepointResourceId = sharepointResourceId;
 			return this;
 		}
 		

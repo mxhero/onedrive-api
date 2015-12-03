@@ -171,18 +171,18 @@ public class OneDrive {
 	/**
 	 * Redeem business api.
 	 *
-	 * @param sharepointBusinessURI the resource id
+	 * @param resourceId the resource id
 	 * @param clientId the client id
 	 * @param clientSecret the client secret
 	 * @param redirectUri the redirect uri
 	 * @param refreshToken the refresh token
 	 * @return the map
 	 */
-	private static Map<String, Object> redeemBusinessApi(String sharepointBusinessURI, String clientId, String clientSecret, String redirectUri, String refreshToken){
+	private static Map<String, Object> redeemBusinessApi(String resourceId, String clientId, String clientSecret, String redirectUri, String refreshToken){
 		List<BasicNameValuePair> params = buildParams(clientId, redirectUri, clientSecret);
 		params.add(new BasicNameValuePair("refresh_token",refreshToken));
 		params.add(new BasicNameValuePair("grant_type","refresh_token"));
-		params.add(new BasicNameValuePair("resource",sharepointBusinessURI));
+		params.add(new BasicNameValuePair("resource",resourceId));
 		return redeemNow(params);
 	}
 

@@ -15,6 +15,8 @@
  */
 package com.mxhero.plugin.cloudstorage.onedrive.api;
 
+import org.apache.commons.lang.NotImplementedException;
+
 /*
  * #%L
  * com.mxhero.plugin.cloudstorage.onedrive
@@ -40,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.Command;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandFactory;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandHandler;
+import com.mxhero.plugin.cloudstorage.onedrive.api.command.RefreshBusinessCommand;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.Drive;
 
 
@@ -102,6 +105,18 @@ public class Drives {
 	}
 	
 	/**
+	 * Validate implementation.
+	 *
+	 * @param command the command
+	 */
+	@SuppressWarnings("rawtypes")
+	private void validateImplementation(Command command) {
+		if(command instanceof RefreshBusinessCommand){
+			throw new NotImplementedException("Not implemented yet for Business API");
+		}
+	}
+
+	/**
 	 * Gets the.
 	 *
 	 * @param id the id
@@ -109,6 +124,7 @@ public class Drives {
 	 */
 	public Drive get(final String id){
 		final Command<Drive> command = commandFactory.create();
+		validateImplementation(command);
 		logger.debug("called user default drive");
 		return command.excecute(new CommandHandler<Drive>() {
 			
