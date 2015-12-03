@@ -34,6 +34,7 @@ import org.junit.Test;
 
 import com.mxhero.plugin.cloudstorage.onedrive.api.Items.ConflictBehavior;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.ApiException;
+import com.mxhero.plugin.cloudstorage.onedrive.api.command.AuthenticationException;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.Drive;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.Item;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.ItemList;
@@ -41,11 +42,22 @@ import com.mxhero.plugin.cloudstorage.onedrive.api.model.ItemReference;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.Permission;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.ThumbnailSetList;
 
+/**
+ * The Class OneDriveBusinessTest.
+ */
 public class OneDriveBusinessTest {
 	
+	/** The test enviroment. */
 	private static BusinessTestEnviroment testEnviroment;
+	
+	/** The api. */
 	private OneDrive api;
 	
+	/**
+	 * Before class.
+	 *
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	@BeforeClass
 	public static void beforeClass() throws IOException{
 		if(testEnviroment==null){
@@ -58,16 +70,39 @@ public class OneDriveBusinessTest {
 		}
 	}
 	
+	/**
+	 * Before.
+	 */
 	@Before
 	public void before(){
 		assumeNotNull(testEnviroment);
 		api = createApi();
 	}
 	
+	/**
+	 * Gets the file.
+	 *
+	 * @return the file
+	 */
 	private File getFile(){
 		return new File(Thread.currentThread().getContextClassLoader().getResource("logo_96x96.png").getFile());
 	}
 	
+	/**
+	 * Gets the json file.
+	 *
+	 * @return the json file
+	 */
+	private File getJsonFile(){
+		return new File(Thread.currentThread().getContextClassLoader().getResource("file.json").getFile());
+	}
+	
+	
+	/**
+	 * Creates the api.
+	 *
+	 * @return the one drive
+	 */
 	private OneDrive createApi(){
 		return new OneDrive.Builder()
 				.businessCredential(testEnviroment.getCredential())
@@ -75,6 +110,9 @@ public class OneDriveBusinessTest {
 				.build();
 	}
 	
+	/**
+	 * Test drive user default.
+	 */
 	@Test
 	public void testDriveUserDefault(){
 		Drive drive = api.drives().userDefault();
@@ -82,6 +120,9 @@ public class OneDriveBusinessTest {
 		System.out.println(drive.toString());
 	}
 
+	/**
+	 * Test drive by id.
+	 */
 	@Test
 	public void testDriveById(){
 		try {
@@ -91,6 +132,9 @@ public class OneDriveBusinessTest {
 		}
 	}
 	
+	/**
+	 * List root childrens.
+	 */
 	@Test
 	public void listRootChildrens(){
 		ItemList itemList = api.items().childrenByPath("");
@@ -98,6 +142,9 @@ public class OneDriveBusinessTest {
 		System.out.println(itemList.toString());
 	}
 	
+	/**
+	 * List children by path.
+	 */
 	@Test
 	public void listChildrenByPath(){
 		ItemList itemList = api.items().childrenByPath("Documents");
@@ -106,6 +153,11 @@ public class OneDriveBusinessTest {
 		System.out.println(itemList.toString());
 	}
 	
+	/**
+	 * Gets the item by id.
+	 *
+	 * @return the item by id
+	 */
 	@Test
 	public void getItemById(){
 		Item item = api.items().metadataById("01WHV54E2PY7KVF2FPRJHZHA6QXQIXMJVH");
@@ -113,6 +165,11 @@ public class OneDriveBusinessTest {
 		System.out.println(item.toString());
 	}
 	
+	/**
+	 * Gets the item by id with parameters.
+	 *
+	 * @return the item by id with parameters
+	 */
 	@Test
 	public void getItemByIdWithParameters(){
 		Items items = api.items();
@@ -122,6 +179,11 @@ public class OneDriveBusinessTest {
 		System.out.println(item.toString());		
 	}
 
+	/**
+	 * Gets the item by path.
+	 *
+	 * @return the item by path
+	 */
 	@Test
 	public void getItemByPath(){
 		Items items = api.items();
@@ -133,6 +195,9 @@ public class OneDriveBusinessTest {
 		System.out.println(item.toString());
 	}
 
+	/**
+	 * Search by path.
+	 */
 	@Test
 	public void searchByPath(){
 		ItemList searchResult = api.items().searchByPath("", new Parameters().query("asset1.png"));	
@@ -140,6 +205,9 @@ public class OneDriveBusinessTest {
 		System.out.println(searchResult);
 	}
 	
+	/**
+	 * Thumbnails.
+	 */
 	@Test
 	public void thumbnails(){
 		ThumbnailSetList list = api.items().thumbnails("01WHV54E7EEYHNL7TERRHJBZKESEO3C7GI", null);	
@@ -147,6 +215,9 @@ public class OneDriveBusinessTest {
 		assertTrue(list.getValue().size()>0);
 	}
 	
+	/**
+	 * Simple upload.
+	 */
 	@Test
 	public void simpleUpload(){
 		Items items = api.items();
@@ -162,6 +233,24 @@ public class OneDriveBusinessTest {
 		assertNotNull(simpleUploadById);
 	}
 	
+	/**
+	 * Simple upload authorization exception because invalid file extension.
+	 */
+	@Test(expected = AuthenticationException.class)
+	public void simpleUploadAuthorizationExceptionBecauseInvalidFileExtension(){
+		Items items = api.items();
+		items.simpleUploadByPath("Documents"
+				, "uploadtest.json"
+				, getJsonFile()
+				, ConflictBehavior.replace);
+		fail();
+	}
+	
+	/**
+	 * Delete.
+	 *
+	 * @throws FileNotFoundException the file not found exception
+	 */
 	@Test
 	public void delete() throws FileNotFoundException{
 		Items items = api.items();
@@ -173,6 +262,11 @@ public class OneDriveBusinessTest {
 		assertNull(items.metadataByPath("Documents/delete.png"));
 	}
 	
+	/**
+	 * Api exception.
+	 *
+	 * @throws FileNotFoundException the file not found exception
+	 */
 	@Test
 	public void apiException() throws FileNotFoundException{
 		Items items = api.items();
@@ -195,6 +289,9 @@ public class OneDriveBusinessTest {
 		}
 	}
 	
+	/**
+	 * Copy.
+	 */
 	@Test
 	public void copy(){
 		Items items = api.items();
@@ -219,6 +316,9 @@ public class OneDriveBusinessTest {
 		assertTrue(items.deleteByPath("Documents/copy.png"));
 	}
 	
+	/**
+	 * Move.
+	 */
 	@Test
 	public void move(){
 		Items items = api.items();
@@ -242,6 +342,9 @@ public class OneDriveBusinessTest {
 		assertFalse(items.deleteByPath("demo/move.png"));
 	}
 	
+	/**
+	 * Creates the folder.
+	 */
 	@Test
 	public void createFolder(){
 		Items items = api.items();
@@ -252,6 +355,9 @@ public class OneDriveBusinessTest {
 		assertNotNull(createFolder);
 	}
 	
+	/**
+	 * Creates the link.
+	 */
 	@Test
 	public void createLink(){
 		Items items = api.items();

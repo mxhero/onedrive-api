@@ -23,6 +23,7 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -43,9 +44,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.ApiException;
+import com.mxhero.plugin.cloudstorage.onedrive.api.command.AuthenticationException;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.Command;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandFactory;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandHandler;
+import com.mxhero.plugin.cloudstorage.onedrive.api.command.RefreshBusinessCommand;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.Item;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.ItemList;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.ItemReference;
@@ -639,6 +642,7 @@ public class Items {
 	 */
 	private Item simpleUpload(final String path, final File file, final ConflictBehavior conflictBehavior){
 		final Command<Item> command = this.commandFactory.create();
+		validateImplementation(command, file.getName());
 		return command.excecute(new CommandHandler<Item>() {
 			
 			@Override
@@ -676,6 +680,16 @@ public class Items {
 		});
 	}
 	
+	private void validateImplementation(Command<Item> command, String fileName) {
+		if(command instanceof RefreshBusinessCommand){
+			String regex = "ashx|asmx|json|soap|svc|xamlx";
+			Pattern compile = Pattern.compile(regex);
+			if(compile.matcher(fileName).find()){				
+				throw new AuthenticationException("The following extensions are not allowed to upload for Business API. "+regex);
+			}
+		}		
+	}
+
 	/**
 	 * Creates the folder.
 	 *
