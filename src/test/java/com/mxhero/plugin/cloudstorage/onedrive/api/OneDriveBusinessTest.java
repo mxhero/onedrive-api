@@ -64,7 +64,7 @@ public class OneDriveBusinessTest {
 			try{
 				testEnviroment=OneDrive.JACKSON.readValue(new URL(System.getProperty("test.enviroment.business.json.url")), BusinessTestEnviroment.class);
 			}catch(Exception e){
-				System.out.println(" couldnt read BusinessCredential fro url in SystemProperty test.enviroment.business.json.url with value "+System.getProperty("test.enviroment.business.json.url"));
+				System.out.println("This test should be ignore because couldnt read BusinessCredential fro url in SystemProperty test.enviroment.business.json.url with value "+System.getProperty("test.enviroment.business.json.url"));
 				e.printStackTrace();
 			}
 		}
