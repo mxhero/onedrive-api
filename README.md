@@ -166,7 +166,7 @@ Development
 
 Want to contribute? Great!
 
-If you have any doubt please contact mmarmol at mxhero.com
+If you have any doubt please contact mmarmol@mxhero.com
 
 
 Todos
@@ -174,8 +174,7 @@ Todos
 
  - Add all upload calls
  - Implement SyncChanges backend
- - Api for Business implementation
- - Extend configuration out of enviroment and system properties only
+ - Extend configuration out of environment and system properties only
  - Add Code Comments
 
 
