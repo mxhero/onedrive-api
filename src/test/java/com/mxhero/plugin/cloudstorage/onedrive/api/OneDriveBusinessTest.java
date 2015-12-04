@@ -115,6 +115,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test
 	public void testDriveUserDefault(){
+		assumeNotNull(testEnviroment);
 		Drive drive = api.drives().userDefault();
 		assertNotNull(drive);
 		System.out.println(drive.toString());
@@ -125,6 +126,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test
 	public void testDriveById(){
+		assumeNotNull(testEnviroment);
 		try {
 			api.drives().get("b!GuF7GLZVSECYDcI0TtAwICr_E1mM2xhLsCNaup9ktWgI5iYvyQbSTbYvei8qjBnS");
 			fail();
@@ -137,6 +139,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test
 	public void listRootChildrens(){
+		assumeNotNull(testEnviroment);
 		ItemList itemList = api.items().childrenByPath("");
 		assertNotNull(itemList);
 		System.out.println(itemList.toString());
@@ -147,6 +150,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test
 	public void listChildrenByPath(){
+		assumeNotNull(testEnviroment);
 		ItemList itemList = api.items().childrenByPath("Documents");
 		assertNotNull(itemList);
 		assertTrue(itemList.getValue().size()>0);
@@ -160,6 +164,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test
 	public void getItemById(){
+		assumeNotNull(testEnviroment);
 		Item item = api.items().metadataById("01WHV54E2PY7KVF2FPRJHZHA6QXQIXMJVH");
 		assertNotNull(item);
 		System.out.println(item.toString());
@@ -172,6 +177,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test
 	public void getItemByIdWithParameters(){
+		assumeNotNull(testEnviroment);
 		Items items = api.items();
 		Item item =items.metadataById("01WHV54E2PY7KVF2FPRJHZHA6QXQIXMJVH", new Parameters().select("id,name"));
 		assertNotNull(item.getName());
@@ -186,6 +192,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test
 	public void getItemByPath(){
+		assumeNotNull(testEnviroment);
 		Items items = api.items();
 		Item item = items.metadataByPath("demo");
 		assertNotNull(item);
@@ -200,6 +207,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test
 	public void searchByPath(){
+		assumeNotNull(testEnviroment);
 		ItemList searchResult = api.items().searchByPath("", new Parameters().query("asset1.png"));	
 		assertTrue(searchResult.getValue().size()>0);
 		System.out.println(searchResult);
@@ -210,6 +218,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test
 	public void thumbnails(){
+		assumeNotNull(testEnviroment);
 		ThumbnailSetList list = api.items().thumbnails("01WHV54E7EEYHNL7TERRHJBZKESEO3C7GI", null);	
 		System.out.println(list);
 		assertTrue(list.getValue().size()>0);
@@ -220,6 +229,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test
 	public void simpleUpload(){
+		assumeNotNull(testEnviroment);
 		Items items = api.items();
 		Item simpleUploadByPath = items.simpleUploadByPath("Documents"
 				, "uploadtest.png"
@@ -238,6 +248,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test(expected = AuthenticationException.class)
 	public void simpleUploadAuthorizationExceptionBecauseInvalidFileExtension(){
+		assumeNotNull(testEnviroment);
 		Items items = api.items();
 		items.simpleUploadByPath("Documents"
 				, "uploadtest.json"
@@ -253,6 +264,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test
 	public void delete() throws FileNotFoundException{
+		assumeNotNull(testEnviroment);
 		Items items = api.items();
 		items.simpleUploadByPath("Documents"
 				, "delete.png"
@@ -269,6 +281,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test
 	public void apiException() throws FileNotFoundException{
+		assumeNotNull(testEnviroment);
 		Items items = api.items();
 		items.deleteByPath("Documents/delete.png");
 		items.simpleUploadByPath("Documents"
@@ -294,6 +307,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test
 	public void copy(){
+		assumeNotNull(testEnviroment);
 		Items items = api.items();
 		items.deleteByPath("Documents/copy_1.png");
 		items.deleteByPath("Documents/copy.png");
@@ -321,6 +335,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test
 	public void move(){
+		assumeNotNull(testEnviroment);
 		Items items = api.items();
 		items.deleteByPath("Documents/move.png");
 		items.deleteByPath("demo/move.png");
@@ -347,6 +362,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test
 	public void createFolder(){
+		assumeNotNull(testEnviroment);
 		Items items = api.items();
 		System.out.println(items.deleteByPath("folder"));
 		System.out.println(items.createFolder(items.createFolder("root", "folder", ConflictBehavior.rename).getId(), "subfolder", ConflictBehavior.fail));
@@ -360,6 +376,7 @@ public class OneDriveBusinessTest {
 	 */
 	@Test
 	public void createLink(){
+		assumeNotNull(testEnviroment);
 		Items items = api.items();
 		items.deleteByPath("Documents/link.png");
 		Item item = items.simpleUploadByPath("Documents"
