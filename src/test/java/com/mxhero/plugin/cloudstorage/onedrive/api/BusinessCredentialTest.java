@@ -33,7 +33,7 @@ public class BusinessCredentialTest {
 		assertTrue(credential instanceof Credential);
 		assertFalse(credential instanceof BusinessCredential);
 		
-		BusinessCredential credentialBusiness = (BusinessCredential) BusinessCredential.builder().sharepointEndpointUri("myuri").accessToken("ACCESS_TOKEN").refreshToken("REFRESH_TOKEN").scope("SCPOPE").tokenType("Bearer").build();
+		BusinessCredential credentialBusiness = (BusinessCredential) BusinessCredential.builder().sharepointEndpointUri("myuri").sharepointResourceId("resourceid").accessToken("ACCESS_TOKEN").refreshToken("REFRESH_TOKEN").scope("SCPOPE").tokenType("Bearer").build();
 		assertNotNull(credentialBusiness);
 		assertTrue(credentialBusiness instanceof Credential);
 		assertTrue(credentialBusiness instanceof BusinessCredential);

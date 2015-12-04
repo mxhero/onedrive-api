@@ -214,12 +214,8 @@ public class Credential {
 	public static class Builder {
 
 		/** The instance. */
-		protected Credential instance;
+		private Credential instance = new Credential();
 		
-		public Builder() {
-			this.instance = new Credential();
-		}
-
 		/**
 		 * User.
 		 *

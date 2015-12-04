@@ -20,6 +20,8 @@ import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
+import com.mxhero.plugin.cloudstorage.onedrive.api.command.TokenRefreshListener;
+
 /**
  * The Class BusinessCredential.
  */
@@ -100,14 +102,9 @@ public class BusinessCredential extends Credential {
 	/**
 	 * The Class BuilderBusiness.
 	 */
-	public static class BuilderBusiness extends Builder{
+	public static class BuilderBusiness{
 		
-		/**
-		 * Instantiates a new builder business.
-		 */
-		public BuilderBusiness() {
-			this.instance = new BusinessCredential();
-		}
+		private BusinessCredential instance = new BusinessCredential();
 		
 		/**
 		 * Sharepoint endpoint uri.
@@ -116,7 +113,7 @@ public class BusinessCredential extends Credential {
 		 * @return the builder business
 		 */
 		public BuilderBusiness sharepointEndpointUri(String uri){
-			((BusinessCredential)this.instance).sharepointEndpointUri = uri;
+			this.instance.sharepointEndpointUri = uri;
 			return this;
 		}
 		
@@ -127,8 +124,48 @@ public class BusinessCredential extends Credential {
 		 * @return the builder business
 		 */
 		public BuilderBusiness sharepointResourceId(String sharepointResourceId){
-			((BusinessCredential)this.instance).sharepointResourceId = sharepointResourceId;
+			this.instance.sharepointResourceId = sharepointResourceId;
 			return this;
+		}
+		
+		public BuilderBusiness accessToken(String accessToken) {
+			this.instance.setAccessToken(accessToken);
+			return this;
+		}
+		
+		public BuilderBusiness refreshToken(String refreshToken) {
+			this.instance.setRefreshToken(refreshToken);
+			return this;
+		}
+
+		public BuilderBusiness listener(TokenRefreshListener listener) {
+			this.instance.setListener(listener);
+			return this;
+		}
+
+		public BuilderBusiness scope(String scope) {
+			this.instance.setScope(scope);
+			return this;
+		}
+
+		public BuilderBusiness tokenType(String tokenType) {
+			this.instance.setTokenType(tokenType);
+			return this;
+		}
+		
+		public BuilderBusiness user(String user) {
+			this.instance.setUser(user);
+			return this;
+		}
+
+		public BuilderBusiness userId(String userId) {
+			this.instance.setUserId(userId);
+			return this;
+		}
+
+		public BusinessCredential build() {
+			this.instance.validate();
+			return this.instance;
 		}
 		
 	}

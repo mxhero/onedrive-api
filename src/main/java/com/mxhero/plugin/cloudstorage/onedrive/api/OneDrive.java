@@ -44,7 +44,6 @@ import org.xml.sax.InputSource;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandFactory;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.DiscoveryService;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.DiscoveryServices;
-import com.mxhero.plugin.cloudstorage.onedrive.api.model.OneDriveBusiness;
 
 /**
  * The Class OneDrive.
@@ -107,7 +106,7 @@ public class OneDrive {
 	 * @return the one drive business object which encapsulate credential info, such as access and refresh token and sharepoint URL for further OneDrive for Business API calls
 	 * @throws AuthenticationException the authentication exception
 	 */
-	public static OneDriveBusiness redeemBusiness(String code, String clientId, String clientSecret, String redirectUri) throws AuthenticationException{
+	public static BusinessCredential redeemBusiness(String code, String clientId, String clientSecret, String redirectUri) throws AuthenticationException{
 		try {
 			Discovery discovery = new Discovery();
 			logger.debug("Redeem for OneDrive Business API.");
@@ -122,15 +121,13 @@ public class OneDrive {
 				String userEmail = businessEmail(rootSharepoint.getServiceEndpointUri(), (String)redeemBusinessApiRootSharepoint.get("access_token"));
 				Map<String, Object> redeemBusinessApi = redeemBusinessApi(oneDriveBusiness.getServiceResourceId(), clientId, clientSecret, redirectUri, credential.getRefreshToken());
 				logger.debug("Redeem for OneDrive Business API sharepoint specific URL {}", oneDriveBusiness);
-				return OneDriveBusiness.builder()
-						.credential(new Credential.Builder()
-								.accessToken((String)redeemBusinessApi.get("access_token"))
-								.refreshToken((String)redeemBusinessApi.get("refresh_token"))
-								.tokenType((String)redeemBusinessApi.get("token_type"))
-								.user(userEmail)
-								.build())
+				return BusinessCredential.builder()
 						.sharepointEndpointUri(oneDriveBusiness.getServiceEndpointUri())
 						.sharepointResourceId(oneDriveBusiness.getServiceResourceId())
+						.accessToken((String)redeemBusinessApi.get("access_token"))
+						.refreshToken((String)redeemBusinessApi.get("refresh_token"))
+						.tokenType((String)redeemBusinessApi.get("token_type"))
+						.user(userEmail)
 						.build();
 			}else{
 				throw new AuthenticationException("User doesnt have OneDrive Business API enabled");
