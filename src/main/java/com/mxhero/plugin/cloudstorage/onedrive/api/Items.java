@@ -728,7 +728,7 @@ public class Items {
 				HttpPost httpPost = new HttpPost(postUrl);
 				httpPost.setHeader("Content-type", "application/json");
 				Map<String, Object> item = new HashMap<>();
-				item.put("name", cleanAndShortName(name));
+				item.put("name", cleanAndShortName(name).replaceAll("\\.*$", ""));
 				item.put("folder", new HashMap<>());
 				item.put("@name.conflictBehavior", conflictBehavior.name());
 				try {
