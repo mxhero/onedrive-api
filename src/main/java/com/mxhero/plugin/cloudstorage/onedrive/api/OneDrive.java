@@ -88,7 +88,7 @@ public class OneDrive {
 		List<BasicNameValuePair> params = buildParams(clientId, redirectUri, clientSecret);
 		params.add(new BasicNameValuePair("code",code));
 		params.add(new BasicNameValuePair("grant_type","authorization_code"));
-		return redeemNow(params);
+		return redeemNow(ApiEnviroment.tokenBaseUrl.getValue(), params);
 	}
 
 	/**
@@ -180,7 +180,7 @@ public class OneDrive {
 		params.add(new BasicNameValuePair("refresh_token",refreshToken));
 		params.add(new BasicNameValuePair("grant_type","refresh_token"));
 		params.add(new BasicNameValuePair("resource",resourceId));
-		return redeemNow(params);
+		return redeemNow(ApiEnviroment.tokenBusinessBaseUrl.getValue(), params);
 	}
 
 	/**
@@ -206,9 +206,9 @@ public class OneDrive {
 	 * @return the map
 	 */
 	@SuppressWarnings("unchecked")
-	private static Map<String, Object> redeemNow(List<BasicNameValuePair> params) {
+	private static Map<String, Object> redeemNow(String tokenUrl, List<BasicNameValuePair> params) {
 		try{
-			HttpPost httpPost = new HttpPost(ApiEnviroment.tokenBusinessBaseUrl.getValue());		
+			HttpPost httpPost = new HttpPost(tokenUrl);		
 			httpPost.setEntity(new UrlEncodedFormEntity(params));
 			HttpResponse response = HttpClientBuilder.create().build().execute(httpPost);
 			String responseString = EntityUtils.toString(response.getEntity());
