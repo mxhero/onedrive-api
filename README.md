@@ -196,7 +196,7 @@ Maven Repo
     <dependency>
     	<groupId>org.mxhero.plugin.cloudstorage</groupId>
     	<artifactId>org.mxhero.plugin.cloudstorage.onedriveapi</artifactId>
-    	<version>0.3.5</version>
+    	<version>0.4.2</version>
     </dependency>
 
 Building SDK

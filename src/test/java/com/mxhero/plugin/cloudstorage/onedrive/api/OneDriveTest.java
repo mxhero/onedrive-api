@@ -285,7 +285,8 @@ public class OneDriveTest {
 
 		Items items = createApi().items();
 		System.out.println(items.deleteByPath("folder"));
-		System.out.println(items.createFolder(items.createFolder("root", "folder", ConflictBehavior.rename).getId(), "subfolder", ConflictBehavior.fail));
+		System.out.println(items.createFolder("root", "folder.", ConflictBehavior.rename).getId());
+		System.out.println(items.createFolder(items.metadataByPath("folder").getId(), "subfolder", ConflictBehavior.fail));
 		System.out.println(items.deleteByPath("folder"));
 		items.createFolder("root", "marcelo@gmail.com", ConflictBehavior.rename);
 	}
