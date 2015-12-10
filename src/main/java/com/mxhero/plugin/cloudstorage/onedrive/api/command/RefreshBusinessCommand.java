@@ -32,7 +32,9 @@ import com.mxhero.plugin.cloudstorage.onedrive.api.ApiEnviroment;
 import com.mxhero.plugin.cloudstorage.onedrive.api.Application;
 import com.mxhero.plugin.cloudstorage.onedrive.api.BusinessCredential;
 import com.mxhero.plugin.cloudstorage.onedrive.api.Credential;
+import com.mxhero.plugin.cloudstorage.onedrive.api.command.validators.Validators;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class RefreshCommand.
  *
@@ -86,6 +88,14 @@ public class RefreshBusinessCommand<T> extends RefreshCommand<T>{
 	@Override
 	public String baseUrl() {
 		return getCredential().getSharepointEndpointUri();
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.mxhero.plugin.cloudstorage.onedrive.api.command.RefreshCommand#validate(com.mxhero.plugin.cloudstorage.onedrive.api.command.Validator)
+	 */
+	@Override
+	public void validate(Validator toBeValidated) {
+		Validators.get(toBeValidated.getType()).validate(toBeValidated.getName());
 	}
 
 }

@@ -15,6 +15,7 @@
  */
 package com.mxhero.plugin.cloudstorage.onedrive.api.command;
 
+// TODO: Auto-generated Javadoc
 /*
  * #%L
  * com.mxhero.plugin.cloudstorage.sharefile
@@ -50,4 +51,11 @@ public interface Command<T> {
 	 * @return the string
 	 */
 	public String baseUrl();
+
+	/**
+	 * Validate.
+	 *
+	 * @param toBeValidated the to be validated
+	 */
+	public void validate(Validator toBeValidated);
 }

@@ -28,4 +28,15 @@ public class ItemsTest {
 		assertEquals("Documents/one+test/test+this%28%29",Items.cleanAndEncodePath("Documents/one test/ test this()"));
 	}
 	
+	@Test
+	public void testCleanAndEncodePathStartingWithDotRemoved(){
+		assertEquals("Documents/one+test/test+this%28%29",Items.cleanAndEncodePath("Documents/.one test/.test this()"));
+		assertEquals("Documents/one+test/test+this%28%29",Items.cleanAndEncodePath("Documents/~one test/.test this()"));
+	}
+	
+	@Test
+	public void testCleanAndEncodePathNotAllowedCharactersRemoved(){
+		assertEquals("Documents/one++test/test+++this%28%29",Items.cleanAndEncodePath("Documents/.one &test/.test{} this()~"));
+	}
+	
 }

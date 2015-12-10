@@ -57,6 +57,7 @@ import com.mxhero.plugin.cloudstorage.onedrive.api.Application;
 import com.mxhero.plugin.cloudstorage.onedrive.api.Credential;
 import com.mxhero.plugin.cloudstorage.onedrive.api.OneDrive;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class RefreshCommand.
  *
@@ -234,4 +235,9 @@ public class RefreshCommand<T> implements Command<T>{
 		return baseUrl;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.mxhero.plugin.cloudstorage.onedrive.api.command.Command#validate(com.mxhero.plugin.cloudstorage.onedrive.api.command.Validator)
+	 */
+	@Override
+	public void validate(Validator toBeValidated){}
 }

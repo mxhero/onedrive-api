@@ -23,7 +23,6 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -44,11 +43,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.ApiException;
-import com.mxhero.plugin.cloudstorage.onedrive.api.command.AuthenticationException;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.Command;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandFactory;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandHandler;
-import com.mxhero.plugin.cloudstorage.onedrive.api.command.RefreshBusinessCommand;
+import com.mxhero.plugin.cloudstorage.onedrive.api.command.Validator;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.Item;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.ItemList;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.ItemReference;
@@ -64,7 +62,7 @@ public class Items {
 	private static Logger logger = LoggerFactory.getLogger(Items.class);
 	
 	/** The Constant RESERVED_CHARACTERS_PATTERN. */
-	public static final String RESERVED_CHARACTERS_PATTERN = "[/\\*<>?:|#%\"]";
+	public static final String RESERVED_CHARACTERS_PATTERN = "[/\\*<>?:|#%\"\\$\\{\\}~\\&]";
 	
 	/** The Constant DRIVE_ITEMS. */
 	public static final String DRIVE_ITEMS = "/drive/items/";
@@ -566,6 +564,7 @@ public class Items {
 	 */
 	private String postCopy(final String path, final ItemReference parentReference, final String name){
 		final Command<String> command = this.commandFactory.create();
+		command.validate(Validator.builder().file().name(name).build());
 		return command.excecute(new CommandHandler<String>() {
 			
 			@Override
@@ -639,10 +638,11 @@ public class Items {
 	 * @param file the file
 	 * @param conflictBehavior the conflict behavior
 	 * @return the item
+	 * @throws IllegalArgumentException
 	 */
 	private Item simpleUpload(final String path, final File file, final ConflictBehavior conflictBehavior){
 		final Command<Item> command = this.commandFactory.create();
-		validateImplementation(command, file.getName());
+		command.validate(Validator.builder().file().name(file.getName()).build());
 		return command.excecute(new CommandHandler<Item>() {
 			
 			@Override
@@ -679,16 +679,7 @@ public class Items {
 			}
 		});
 	}
-	
-	private void validateImplementation(Command<Item> command, String fileName) {
-		if(command instanceof RefreshBusinessCommand){
-			String regex = "ashx|asmx|json|soap|svc|xamlx";
-			Pattern compile = Pattern.compile(regex);
-			if(compile.matcher(fileName).find()){				
-				throw new AuthenticationException("The following extensions are not allowed to upload for Business API. "+regex);
-			}
-		}		
-	}
+
 
 	/**
 	 * Creates the folder.
@@ -700,6 +691,7 @@ public class Items {
 	 */
 	public Item createFolder(final String parentId, final String name, final ConflictBehavior conflictBehavior){
 		final Command<Item> command = commandFactory.create();
+		command.validate(Validator.builder().folder().name(name).build());
 		return command.excecute(new CommandHandler<Item>() {
 			
 			@Override
@@ -906,7 +898,11 @@ public class Items {
 			String cleanPath="";
 			for(String segment : path.split("/")){
 				try {
-					cleanPath=cleanPath+URLEncoder.encode(segment.replaceAll(RESERVED_CHARACTERS_PATTERN, " ").trim(),"UTF-8")+"/";
+					String segmentWithoutDot = segment;
+					if(segmentWithoutDot.startsWith(".") || segmentWithoutDot.startsWith("~")){
+						segmentWithoutDot = segmentWithoutDot.substring(1);
+					}
+					cleanPath = cleanPath+URLEncoder.encode(segmentWithoutDot.replaceAll(RESERVED_CHARACTERS_PATTERN, " ").trim(),"UTF-8")+"/";
 				} catch (UnsupportedEncodingException e) {
 				}
 			}
