@@ -18,8 +18,6 @@ package com.mxhero.plugin.cloudstorage.onedrive.api;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,6 +50,7 @@ import com.mxhero.plugin.cloudstorage.onedrive.api.model.ItemList;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.ItemReference;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.Permission;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.ThumbnailSetList;
+import com.mxhero.plugin.cloudstorage.onedrive.api.utils.URLEncoder;
 
 /**
  * The Class Items.
@@ -897,14 +896,11 @@ public class Items {
 		if(path!=null){
 			String cleanPath="";
 			for(String segment : path.split("/")){
-				try {
-					String segmentWithoutDot = segment;
-					if(segmentWithoutDot.startsWith(".") || segmentWithoutDot.startsWith("~")){
-						segmentWithoutDot = segmentWithoutDot.substring(1);
-					}
-					cleanPath = cleanPath+URLEncoder.encode(segmentWithoutDot.replaceAll(RESERVED_CHARACTERS_PATTERN, " ").trim(),"UTF-8")+"/";
-				} catch (UnsupportedEncodingException e) {
+				String segmentWithoutDot = segment;
+				if(segmentWithoutDot.startsWith(".") || segmentWithoutDot.startsWith("~")){
+					segmentWithoutDot = segmentWithoutDot.substring(1);
 				}
+				cleanPath += URLEncoder.encode(segmentWithoutDot.replaceAll(RESERVED_CHARACTERS_PATTERN, " ").trim())+"/";
 			}
 			return cleanPath.substring(0,cleanPath.length()-1);
 		}

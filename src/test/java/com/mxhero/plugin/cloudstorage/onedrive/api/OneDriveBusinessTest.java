@@ -193,6 +193,8 @@ public class OneDriveBusinessTest {
 		item = items.metadataByPath("demo/saveAndShare");
 		assertNotNull(item);
 		System.out.println(item.toString());
+		item = items.metadataByPath("demo/Other()");
+		assertNotNull(item);
 	}
 
 	/**
