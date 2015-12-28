@@ -46,6 +46,9 @@ public enum ApiEnviroment {
 	/** The token business base url. */
 	tokenBusinessBaseUrl("ONEDRIVE_BUSINESS_BASE_URL", "onedrive.business.base.url","https://login.microsoftonline.com/common/oauth2/token"),
 		
+	/** The token daemon base url. */
+	tokenDaemonBaseUrl("ONEDRIVE_DAEMON_BASE_URL", "onedrive.daemon.base.url","https://login.microsoftonline.com/%s/oauth2/token"),
+
 	/** The connection request timeout. */
 	connectionRequestTimeout("ONEDRIVE_REQUEST_TIMEOUT", "onedrive.request.timeout","30000"),
 	
@@ -65,7 +68,14 @@ public enum ApiEnviroment {
 	tempUploadFolder("ONEDRIVE_TMP_UPLOAD_FOLDER", "onedrive.tmp.upload.folder", System.getProperty("java.io.tmpdir")),
 	
 	/** The discovery resource uri. */
-	discoveryResourceUri("ONEDRIVE_DISCOVERY_URL", "onedrive.discovery.url","https://api.office.com/discovery/");
+	discoveryResourceUri("ONEDRIVE_DISCOVERY_URL", "onedrive.discovery.url","https://api.office.com/discovery/"),
+	
+	/** The file url pkcs12 certificate. */
+	fileUrlPkcs12Certificate("ONEDRIVE_DAEMON_PKCS12_FILE_URL", "onedrive.daemon.pkcs12.file.url", null),
+	
+	/** The pkcs12 certificate secret. */
+	pkcs12CertificateSecret("ONEDRIVE_DAEMON_PKCS12_FILE_SECRET", "onedrive.daemon.pkcs12.file.secret", null);
+	
 
 	/** The enviroment. */
 	private String enviroment;

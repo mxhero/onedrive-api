@@ -15,14 +15,23 @@
  */
 package com.mxhero.plugin.cloudstorage.onedrive.api;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthenticationException;
@@ -41,6 +50,9 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
+import com.microsoft.aad.adal4j.AsymmetricKeyCredential;
+import com.microsoft.aad.adal4j.AuthenticationContext;
+import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandFactory;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.DiscoveryService;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.DiscoveryServices;
@@ -83,13 +95,26 @@ public class OneDrive {
 	 * @param redirectUri the redirect uri
 	 * @param clientSecret the client secret
 	 * @return the map
+	 * @deprecated Use {@link #redeem(RedeemRequest)} instead
 	 */
+	@Deprecated
 	public static Map<String, Object> redeem(String code, String clientId, String redirectUri, String clientSecret){
-		List<BasicNameValuePair> params = buildParams(clientId, redirectUri, clientSecret);
-		params.add(new BasicNameValuePair("code",code));
+		return redeem(RedeemRequest.builder().code(code).clientId(clientId).clientSecret(clientSecret).redirectUri(redirectUri).build());
+	}
+
+	/**
+	 * Redeem.
+	 *
+	 * @param redeemRequest the redeem request
+	 * @return the map
+	 */
+	public static Map<String, Object> redeem(RedeemRequest redeemRequest){
+		List<BasicNameValuePair> params = buildParams(redeemRequest.getClientId(), redeemRequest.getRedirectUri(), redeemRequest.getClientSecret());
+		params.add(new BasicNameValuePair("code",redeemRequest.getCode()));
 		params.add(new BasicNameValuePair("grant_type","authorization_code"));
 		return redeemNow(ApiEnviroment.tokenBaseUrl.getValue(), params);
 	}
+	
 
 	/**
 	 * Perform entire 4 steps process of Redeem OneDrive for Business API according to documentation {@link https://dev.onedrive.com/auth/aad_oauth.htm}
@@ -105,21 +130,39 @@ public class OneDrive {
 	 * @param redirectUri the redirect uri
 	 * @return the one drive business object which encapsulate credential info, such as access and refresh token and sharepoint URL for further OneDrive for Business API calls
 	 * @throws AuthenticationException the authentication exception
+	 * @deprecated Use {@link #redeemBusiness(RedeemRequest)} instead
 	 */
+	@Deprecated
 	public static BusinessCredential redeemBusiness(String code, String clientId, String clientSecret, String redirectUri) throws AuthenticationException{
+		return redeemBusiness(RedeemRequest.builder().code(code).clientId(clientId).clientSecret(clientSecret).redirectUri(redirectUri).build());
+	}
+
+	/**
+	 * Perform entire 4 steps process of Redeem OneDrive for Business API according to documentation {@link https://dev.onedrive.com/auth/aad_oauth.htm}
+	 * 
+	 * Step 1: Redeem the authorization code for tokens
+	 * Step 2: Discover the OneDrive for Business resource URI
+	 * Step 3: Redeem refresh token for an access token to call OneDrive API
+	 * Step 4: It is not documented but retriever Email address for user access token.
+	 *
+	 * @param redeemRequest the redeem request
+	 * @return the one drive business object which encapsulate credential info, such as access and refresh token and sharepoint URL for further OneDrive for Business API calls
+	 * @throws AuthenticationException the authentication exception
+	 */
+	public static BusinessCredential redeemBusiness(RedeemRequest redeemRequest) throws AuthenticationException{
 		try {
 			Discovery discovery = new Discovery();
 			logger.debug("Redeem for OneDrive Business API.");
-			Credential credential = discovery.redeemDiscovery(code, clientId, clientSecret, redirectUri);
+			Credential credential = discovery.redeemDiscovery(redeemRequest.getCode(), redeemRequest.getClientId(), redeemRequest.getClientSecret(), redeemRequest.getRedirectUri());
 			logger.debug("Discovery for OneDrive Business API done sucessfully.");
 			DiscoveryServices services = discovery.services(credential);
 			logger.debug("Discovery Services for OneDrive Business API retrieved {}", services);
 			DiscoveryService oneDriveBusiness = services.oneDriveBusiness();
 			DiscoveryService rootSharepoint = services.rootSharepoint();
 			if(oneDriveBusiness != null && rootSharepoint!=null){
-				Map<String, Object> redeemBusinessApiRootSharepoint = redeemBusinessApi(rootSharepoint.getServiceResourceId(), clientId, clientSecret, redirectUri, credential.getRefreshToken());				
+				Map<String, Object> redeemBusinessApiRootSharepoint = redeemBusinessApi(rootSharepoint.getServiceResourceId(), redeemRequest.getClientId(), redeemRequest.getClientSecret(), redeemRequest.getRedirectUri(), credential.getRefreshToken());				
 				String userEmail = businessEmail(rootSharepoint.getServiceEndpointUri(), (String)redeemBusinessApiRootSharepoint.get("access_token"));
-				Map<String, Object> redeemBusinessApi = redeemBusinessApi(oneDriveBusiness.getServiceResourceId(), clientId, clientSecret, redirectUri, credential.getRefreshToken());
+				Map<String, Object> redeemBusinessApi = redeemBusinessApi(oneDriveBusiness.getServiceResourceId(), redeemRequest.getClientId(), redeemRequest.getClientSecret(), redeemRequest.getRedirectUri(), credential.getRefreshToken());
 				logger.debug("Redeem for OneDrive Business API sharepoint specific URL {}", oneDriveBusiness);
 				return BusinessCredential.builder()
 						.sharepointEndpointUri(oneDriveBusiness.getServiceEndpointUri())
@@ -133,8 +176,48 @@ public class OneDrive {
 				throw new AuthenticationException("User doesnt have OneDrive Business API enabled");
 			}
 		} catch (Exception e) {
-			throw new AuthenticationException("Could not redeem code "+code+" for Discovery API");			
+			throw new AuthenticationException("Could not redeem code "+redeemRequest.getCode()+" for Discovery API");			
 		}
+	}
+	
+	/**
+	 * Redeem daemon.
+	 *
+	 * @param redeemDaemonRequest the redeem daemon request
+	 * @return the Access Token redeemed it
+	 * @throws AuthenticationException the authentication exception
+	 */
+	public static String redeemDaemon(RedeemDaemonRequest redeemDaemonRequest) throws AuthenticationException{
+		ExecutorService service = Executors.newCachedThreadPool();
+		AuthenticationResult authenticationResult = null;
+		String authority = String.format(ApiEnviroment.tokenDaemonBaseUrl.getValue(), redeemDaemonRequest.getTenantId());
+		logger.debug("Trying to get App Only token for {}", redeemDaemonRequest);
+		try {
+			AuthenticationContext authenticationContext =  new AuthenticationContext(authority, false, service);
+			String filePkcs12 = ApiEnviroment.fileUrlPkcs12Certificate.getValue();
+			if(StringUtils.isNotEmpty(redeemDaemonRequest.getFileUrlPkcs12Certificate())){
+				filePkcs12 = redeemDaemonRequest.getFileUrlPkcs12Certificate(); 
+			}
+			
+			String filePkcs12Secret = ApiEnviroment.pkcs12CertificateSecret.getValue();
+			if(StringUtils.isNotEmpty(redeemDaemonRequest.getCertificateSecret())){
+				filePkcs12Secret = redeemDaemonRequest.getCertificateSecret(); 
+			}
+			
+			InputStream pkcs12Certificate = new FileInputStream(filePkcs12);
+			AsymmetricKeyCredential credential = AsymmetricKeyCredential.create(redeemDaemonRequest.getClientId(), pkcs12Certificate, filePkcs12Secret);
+			
+			Future<AuthenticationResult> future = authenticationContext.acquireToken(redeemDaemonRequest.getResourceSharepointId(), credential, null);
+			authenticationResult = future.get(10, TimeUnit.SECONDS);
+			logger.debug("Token retrieved {}", ToStringBuilder.reflectionToString(authenticationResult, ToStringStyle.SHORT_PREFIX_STYLE));
+			return authenticationResult.getAccessToken();
+		} catch (Exception e) {
+			logger.error("Error trying to get new App Only Token", e);
+			throw new AuthenticationException(String.format("Error trying to get new App Only Token for tenantId %s and sharepointUri %s", redeemDaemonRequest.getTenantId(), redeemDaemonRequest.getResourceSharepointId()));
+		}finally{
+			service.shutdown();
+		}
+
 	}
 
 
@@ -202,6 +285,7 @@ public class OneDrive {
 	/**
 	 * Redeem now.
 	 *
+	 * @param tokenUrl the token url
 	 * @param params the params
 	 * @return the map
 	 */
@@ -308,6 +392,17 @@ public class OneDrive {
 		}
 		
 		/**
+		 * Daemon application.
+		 *
+		 * @param application the application
+		 * @return the builder
+		 */
+		public Builder daemonApplication(DaemonApplication application){
+			this.instance.application = application;
+			return this;
+		}
+		
+		/**
 		 * Credential.
 		 *
 		 * @param credential the credential
@@ -321,10 +416,21 @@ public class OneDrive {
 		/**
 		 * Business url.
 		 *
-		 * @param businessUrl the business url
+		 * @param credential the credential
 		 * @return the builder
 		 */
 		public Builder businessCredential(BusinessCredential credential){
+			this.instance.credential = credential;
+			return this;
+		}
+		
+		/**
+		 * Business url.
+		 *
+		 * @param credential the credential
+		 * @return the builder
+		 */
+		public Builder daemonCredential(DaemonCredential credential){
 			this.instance.credential = credential;
 			return this;
 		}

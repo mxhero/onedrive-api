@@ -64,7 +64,7 @@ public class Items {
 	public static final String RESERVED_CHARACTERS_PATTERN = "[/\\*<>?:|#%\"\\$\\{\\}~\\&]";
 	
 	/** The Constant DRIVE_ITEMS. */
-	public static final String DRIVE_ITEMS = "/drive/items/";
+	public static final String ITEMS = "/items/";
 	
 	/** The Constant CHILDREN. */
 	public static final String CHILDREN = "/children";
@@ -73,7 +73,7 @@ public class Items {
 	public static final String SEARCH = "/view.search";
 	
 	/** The Constant ROOT_ID. */
-	public static final String DRIVE_ROOT = "/drive/root";
+	public static final String ROOT = "/root";
 	
 	/** The Constant CONTENT. */
 	public static final String CONTENT = "/content";
@@ -126,7 +126,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item metadataById(String id, Parameters odata){
-		return this.itemGet(DRIVE_ITEMS+id,odata);
+		return this.itemGet(ITEMS+id,odata);
 	}
 	
 	/**
@@ -147,7 +147,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item metadataByPath(String path, Parameters odata){
-		return this.itemGet(DRIVE_ROOT+((StringUtils.isNotBlank(path))?":/"+cleanAndEncodePath(path):""),odata);
+		return this.itemGet(ROOT+((StringUtils.isNotBlank(path))?":/"+cleanAndEncodePath(path):""),odata);
 	}
 	
 	/**
@@ -168,7 +168,7 @@ public class Items {
 	 * @return the item list
 	 */
 	public ItemList childrenById(String id, Parameters odata){
-		return this.itemListGet(DRIVE_ITEMS+id+CHILDREN, odata);
+		return this.itemListGet(ITEMS+id+CHILDREN, odata);
 	}
 	
 	/**
@@ -189,7 +189,7 @@ public class Items {
 	 * @return the item list
 	 */
 	public ItemList childrenByPath(String path, Parameters odata){
-		return this.itemListGet(DRIVE_ROOT+((StringUtils.isNotBlank(path))?(":/"+cleanAndEncodePath(path)+":"):"")+CHILDREN, odata);
+		return this.itemListGet(ROOT+((StringUtils.isNotBlank(path))?(":/"+cleanAndEncodePath(path)+":"):"")+CHILDREN, odata);
 	}
 	
 	/**
@@ -200,7 +200,7 @@ public class Items {
 	 * @return the item list
 	 */
 	public ItemList searchByPath(String path, Parameters odata){
-		return this.itemListGet(DRIVE_ROOT+((StringUtils.isNotBlank(path))?(":/"+cleanAndEncodePath(path)+":/"):"")+SEARCH, odata);		
+		return this.itemListGet(ROOT+((StringUtils.isNotBlank(path))?(":/"+cleanAndEncodePath(path)+":/"):"")+SEARCH, odata);		
 	}
 	
 	/**
@@ -211,7 +211,7 @@ public class Items {
 	 * @return the item list
 	 */
 	public ItemList searchById(String id, Parameters odata){
-		return this.itemListGet(DRIVE_ITEMS+id+SEARCH, odata);
+		return this.itemListGet(ITEMS+id+SEARCH, odata);
 	}
 	
 	/**
@@ -221,7 +221,7 @@ public class Items {
 	 * @return the boolean
 	 */
 	public Boolean deleteById(String id){
-		return this.deleteItem(DRIVE_ITEMS+id);
+		return this.deleteItem(ITEMS+id);
 	}
 	
 	/**
@@ -231,7 +231,7 @@ public class Items {
 	 * @return the boolean
 	 */
 	public Boolean deleteByPath(String path){
-		return this.deleteItem(DRIVE_ROOT+":/"+cleanAndEncodePath(path));
+		return this.deleteItem(ROOT+":/"+cleanAndEncodePath(path));
 	}
 	
 	/**
@@ -242,7 +242,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item updateById(String id, Item item){
-		return this.updateItem(DRIVE_ITEMS+id, item);
+		return this.updateItem(ITEMS+id, item);
 	}
 	
 	/**
@@ -253,7 +253,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item updateByPath(String path, Item item){
-		return this.updateItem(DRIVE_ROOT+":/"+cleanAndEncodePath(path), item);
+		return this.updateItem(ROOT+":/"+cleanAndEncodePath(path), item);
 	}
 	
 	/**
@@ -266,7 +266,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadByPath(String path, String name, InputStream inputStream, ConflictBehavior conflictBehavior){
-		return simpleUploadStream(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+"/"+cleanAndEncodeAndShortPath(name)+":"+CONTENT, inputStream, conflictBehavior);
+		return simpleUploadStream(ROOT+":/"+cleanAndEncodePath(path)+"/"+cleanAndEncodeAndShortPath(name)+":"+CONTENT, inputStream, conflictBehavior);
 	}
 	
 	/**
@@ -279,7 +279,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadByPath(String path, String name, File file, ConflictBehavior conflictBehavior){
-		return simpleUpload(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+"/"+cleanAndEncodeAndShortPath(name)+":"+CONTENT, file, conflictBehavior);
+		return simpleUpload(ROOT+":/"+cleanAndEncodePath(path)+"/"+cleanAndEncodeAndShortPath(name)+":"+CONTENT, file, conflictBehavior);
 	}
 	
 	/**
@@ -292,7 +292,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadById(String parentId, String name, InputStream inputStream, ConflictBehavior conflictBehavior){
-		return simpleUploadStream(DRIVE_ITEMS+parentId+CHILDREN+"/"+cleanAndEncodeAndShortPath(name)+CONTENT, inputStream, conflictBehavior);
+		return simpleUploadStream(ITEMS+parentId+CHILDREN+"/"+cleanAndEncodeAndShortPath(name)+CONTENT, inputStream, conflictBehavior);
 	}
 	
 	/**
@@ -305,7 +305,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadById(String parentId, String name, File file, ConflictBehavior conflictBehavior){
-		return simpleUpload(DRIVE_ITEMS+parentId+CHILDREN+"/"+cleanAndEncodeAndShortPath(name)+CONTENT, file, conflictBehavior);
+		return simpleUpload(ITEMS+parentId+CHILDREN+"/"+cleanAndEncodeAndShortPath(name)+CONTENT, file, conflictBehavior);
 	}
 
 	/**
@@ -315,7 +315,7 @@ public class Items {
 	 * @return the string
 	 */
 	public String downloadUrlById(String id){
-		return getDownloadUrl(DRIVE_ITEMS+id+CONTENT);
+		return getDownloadUrl(ITEMS+id+CONTENT);
 	}
 	
 	/**
@@ -325,7 +325,7 @@ public class Items {
 	 * @return the string
 	 */
 	public String downloadUrlByPath(String path){
-		return getDownloadUrl(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+":"+CONTENT);
+		return getDownloadUrl(ROOT+":/"+cleanAndEncodePath(path)+":"+CONTENT);
 	}
 	
 	/**
@@ -336,7 +336,7 @@ public class Items {
 	 * @return the string
 	 */
 	public String copyById(String id, ItemReference parentReference){
-		return postCopy(DRIVE_ITEMS+id+COPY,parentReference,null);
+		return postCopy(ITEMS+id+COPY,parentReference,null);
 	}
 
 	/**
@@ -348,7 +348,7 @@ public class Items {
 	 * @return the string
 	 */
 	public String copyById(String id, ItemReference parentReference, String name){
-		return postCopy(DRIVE_ITEMS+id+COPY,parentReference,name);
+		return postCopy(ITEMS+id+COPY,parentReference,name);
 	}
 	
 	/**
@@ -359,7 +359,7 @@ public class Items {
 	 * @return the string
 	 */
 	public String copyByPath(String path, ItemReference parentReference){
-		return postCopy(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+":"+COPY,parentReference,null);
+		return postCopy(ROOT+":/"+cleanAndEncodePath(path)+":"+COPY,parentReference,null);
 	}
 	
 	/**
@@ -371,7 +371,7 @@ public class Items {
 	 * @return the string
 	 */
 	public String copyByPath(String path, ItemReference parentReference, String name){
-		return postCopy(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+":"+COPY,parentReference,name);
+		return postCopy(ROOT+":/"+cleanAndEncodePath(path)+":"+COPY,parentReference,name);
 	}
 	
 	/**
@@ -382,7 +382,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item moveById(String id, ItemReference parentReference){
-		return patchMove(DRIVE_ITEMS+id, parentReference);
+		return patchMove(ITEMS+id, parentReference);
 	}
 	
 	/**
@@ -393,7 +393,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item moveByPath(String path, ItemReference parentReference){
-		return patchMove(DRIVE_ROOT+":/"+cleanAndEncodePath(path), parentReference);
+		return patchMove(ROOT+":/"+cleanAndEncodePath(path), parentReference);
 	}
 
 	/**
@@ -404,7 +404,7 @@ public class Items {
 	 * @return the permission
 	 */
 	public Permission createLinkById(String id, String type){
-		return postCreateLink(DRIVE_ITEMS+id+"/action.createLink", type);
+		return postCreateLink(ITEMS+id+"/action.createLink", type);
 	}
 	
 	/**
@@ -415,7 +415,7 @@ public class Items {
 	 * @return the permission
 	 */
 	public Permission createLinkByPath(String path, String type){
-		return postCreateLink(DRIVE_ROOT+":/"+cleanAndEncodePath(path)+":/action.createLink", type);
+		return postCreateLink(ROOT+":/"+cleanAndEncodePath(path)+":/action.createLink", type);
 	}
 	
 	/**
@@ -497,7 +497,7 @@ public class Items {
 			@Override
 			public HttpUriRequest request() {
 				try {
-					URIBuilder builder = new URIBuilder(command.baseUrl()+DRIVE_ITEMS+id+"/thumbnails");
+					URIBuilder builder = new URIBuilder(command.baseUrl()+ITEMS+id+"/thumbnails");
 					if(parameters!=null){
 						builder.addParameters(parameters.list());
 					}
@@ -586,7 +586,7 @@ public class Items {
 					Map<String,Object> body = new HashMap<>();
 					if(StringUtils.isNotBlank(parentReference.getPath())
 							&& !parentReference.getPath().startsWith("/drive/root:/")){
-						parentReference.setPath(DRIVE_ROOT+":/"+parentReference.getPath());
+						parentReference.setPath(ROOT+":/"+parentReference.getPath());
 					}
 					body.put("parentReference", parentReference);
 					if(StringUtils.isNotBlank(name)){
@@ -637,7 +637,7 @@ public class Items {
 	 * @param file the file
 	 * @param conflictBehavior the conflict behavior
 	 * @return the item
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException the illegal argument exception
 	 */
 	private Item simpleUpload(final String path, final File file, final ConflictBehavior conflictBehavior){
 		final Command<Item> command = this.commandFactory.create();
@@ -712,9 +712,9 @@ public class Items {
 			public HttpUriRequest request() {
 				String postUrl = command.baseUrl();
 				if(StringUtils.isBlank(parentId)|| "root".equalsIgnoreCase(parentId)){
-					postUrl+=DRIVE_ROOT+CHILDREN;
+					postUrl+=ROOT+CHILDREN;
 				}else{
-					postUrl+=DRIVE_ITEMS+parentId+CHILDREN;
+					postUrl+=ITEMS+parentId+CHILDREN;
 				}
 				HttpPost httpPost = new HttpPost(postUrl);
 				httpPost.setHeader("Content-type", "application/json");

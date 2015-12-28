@@ -34,7 +34,6 @@ import org.junit.Test;
 
 import com.mxhero.plugin.cloudstorage.onedrive.api.Items.ConflictBehavior;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.ApiException;
-import com.mxhero.plugin.cloudstorage.onedrive.api.command.AuthenticationException;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.Drive;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.Item;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.ItemList;

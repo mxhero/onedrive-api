@@ -53,12 +53,7 @@ public class Drives {
 
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(Drives.class);
-	
-	/** The Constant DRIVE. */
-	public static final String DRIVE = "/drive";
-	
-	/** The Constant DRIVES. */
-	public static final String DRIVES = "/drives/";
+
 	
 	/** The command factory. */
 	private CommandFactory commandFactory;
@@ -98,7 +93,7 @@ public class Drives {
 			
 			@Override
 			public HttpUriRequest request() {
-				return new HttpGet(command.baseUrl()+DRIVE);
+				return new HttpGet(command.baseUrl());
 			}
 		});
 		
@@ -144,7 +139,7 @@ public class Drives {
 			
 			@Override
 			public HttpUriRequest request() {
-				return new HttpGet(command.baseUrl()+DRIVES+id);
+				return new HttpGet(command.rootUrl()+Command.DRIVES+id);
 			}
 		});
 		

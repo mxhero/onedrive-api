@@ -57,7 +57,6 @@ import com.mxhero.plugin.cloudstorage.onedrive.api.Application;
 import com.mxhero.plugin.cloudstorage.onedrive.api.Credential;
 import com.mxhero.plugin.cloudstorage.onedrive.api.OneDrive;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class RefreshCommand.
  *
@@ -75,7 +74,7 @@ public class RefreshCommand<T> implements Command<T>{
 	protected HttpClientBuilder clientBuilder;
 	
 	/** The application. */
-	private Application application;
+	protected Application application;
 	
 	/** The base url. */
 	private String baseUrl = ApiEnviroment.baseUrl.getValue();
@@ -104,7 +103,7 @@ public class RefreshCommand<T> implements Command<T>{
 			value =  handlerExecute(handler);
 			logger.debug("command executed");
 		}catch(AuthenticationException e){
-			if(StringUtils.isNotEmpty(credential.getRefreshToken())){
+			if(canRefresh()){
 				refreshToken();
 				logger.debug("refresh token executed");
 				value =  handlerExecute(handler);
@@ -113,11 +112,20 @@ public class RefreshCommand<T> implements Command<T>{
 		}
 		return value;
 	}
+
+	/**
+	 * Must refresh.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean canRefresh() {
+		return StringUtils.isNotEmpty(credential.getRefreshToken());
+	}
 	
 	/**
 	 * Refresh token.
 	 */
-	private void refreshToken(){
+	public void refreshToken(){
 		CloseableHttpResponse response = null;
 		try {
 			response = callRefreshToken();
@@ -128,21 +136,9 @@ public class RefreshCommand<T> implements Command<T>{
 				if(result.containsKey("refresh_token")){
 					this.credential.setRefreshToken(result.get("refresh_token").toString());
 				}
-				if(credential.getListener()!=null){
-					try{
-						credential.getListener().onSuccess(credential, result);
-					}catch(Exception e){
-						logger.warn("error executing listener ON SUCESS for credential "+credential+", ignoring",e);
-					}
-				}
+				onSucess(result);
 			}else{
-				if(credential.getListener()!=null){
-					try{
-						credential.getListener().onFaliure(credential, response.getStatusLine().getStatusCode());
-					}catch(Exception e){
-						logger.warn("error executing listener ON FALIURE for credential "+credential+", ignoring",e);
-					}
-				}
+				onFailure(response.getStatusLine().getStatusCode());
 				throw new ApiException(response);
 			}
 		} catch (IOException  e) {
@@ -150,6 +146,36 @@ public class RefreshCommand<T> implements Command<T>{
 		}finally{
 			if(response!=null){
 				try{response.close();}catch(Exception e){};
+			}
+		}
+	}
+
+	/**
+	 * On failure.
+	 *
+	 * @param statusCode the status code
+	 */
+	public void onFailure(int statusCode) {
+		if(credential.getListener()!=null){
+			try{
+				credential.getListener().onFaliure(credential, statusCode);
+			}catch(Exception e){
+				logger.warn("error executing listener ON FALIURE for credential "+credential+", ignoring",e);
+			}
+		}
+	}
+
+	/**
+	 * On sucess.
+	 *
+	 * @param result the result
+	 */
+	public void onSucess(Map<String, Object> result) {
+		if(credential.getListener()!=null){
+			try{
+				credential.getListener().onSuccess(credential, result);
+			}catch(Exception e){
+				logger.warn("error executing listener ON SUCESS for credential "+credential+", ignoring",e);
 			}
 		}
 	}
@@ -232,8 +258,17 @@ public class RefreshCommand<T> implements Command<T>{
 	 */
 	@Override
 	public String baseUrl() {
+		return baseUrl+DRIVE;
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.mxhero.plugin.cloudstorage.onedrive.api.command.Command#rootUrl()
+	 */
+	@Override
+	public String rootUrl() {
 		return baseUrl;
 	}
+	
 
 	/* (non-Javadoc)
 	 * @see com.mxhero.plugin.cloudstorage.onedrive.api.command.Command#validate(com.mxhero.plugin.cloudstorage.onedrive.api.command.Validator)

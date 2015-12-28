@@ -15,8 +15,11 @@
  */
 package com.mxhero.plugin.cloudstorage.onedrive.api;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeNotNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;

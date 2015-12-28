@@ -37,6 +37,12 @@ package com.mxhero.plugin.cloudstorage.onedrive.api.command;
  */
 public interface Command<T> {
 	
+	/** The Constant DRIVE. */
+	static final String DRIVE = "/drive";
+	
+	/** The Constant DRIVES. */
+	static final String DRIVES = "/drives/";
+	
 	/**
 	 * Excecute.
 	 *
@@ -51,6 +57,13 @@ public interface Command<T> {
 	 * @return the string
 	 */
 	public String baseUrl();
+	
+	/**
+	 * Root url.
+	 *
+	 * @return the string
+	 */
+	public String rootUrl();
 
 	/**
 	 * Validate.
@@ -58,4 +71,5 @@ public interface Command<T> {
 	 * @param toBeValidated the to be validated
 	 */
 	public void validate(Validator toBeValidated);
+
 }

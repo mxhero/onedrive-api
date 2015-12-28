@@ -87,7 +87,7 @@ public class RefreshBusinessCommand<T> extends RefreshCommand<T>{
 	 */
 	@Override
 	public String baseUrl() {
-		return getCredential().getSharepointEndpointUri();
+		return getCredential().getSharepointEndpointUri()+DRIVE;
 	}
 	
 	/* (non-Javadoc)
