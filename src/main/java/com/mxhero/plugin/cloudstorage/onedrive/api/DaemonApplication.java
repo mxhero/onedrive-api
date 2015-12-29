@@ -26,24 +26,12 @@ public class DaemonApplication extends Application {
 	/** The certificate secret. */
 	private String certificateSecret;
 	
+	/**
+	 * Instantiates a new daemon application.
+	 */
 	public DaemonApplication() {
 	}
 	
-	/**
-	 * Instantiates a new daemon application.
-	 *
-	 * @param clientId the client id
-	 * @param redirectUri the redirect uri
-	 * @param clientSecret the client secret
-	 * @param fileUrlPkcs12Certificate the file url pkcs12 certificate
-	 * @param certificateSecret the certificate secret
-	 */
-	public DaemonApplication(String clientId, String redirectUri, String clientSecret, String fileUrlPkcs12Certificate, String certificateSecret) {
-		super(clientId, redirectUri, clientSecret);
-		this.fileUrlPkcs12Certificate = fileUrlPkcs12Certificate;
-		this.certificateSecret = certificateSecret;
-	}
-
 	/**
 	 * Gets the file url pkcs12 certificate.
 	 *
@@ -78,6 +66,98 @@ public class DaemonApplication extends Application {
 	 */
 	public void setCertificateSecret(String certificateSecret) {
 		this.certificateSecret = certificateSecret;
+	}
+	
+	/**
+	 * Builder.
+	 *
+	 * @return the builder
+	 */
+	public static DaemonBuilder builderDaemon(){
+		return new DaemonBuilder();
+	}
+	
+	/**
+	 * The Class Builder.
+	 */
+	public static class DaemonBuilder {
+		
+		/** The app. */
+		private DaemonApplication app = new DaemonApplication();
+		
+		/**
+		 * File url pkcs12 certificate.
+		 *
+		 * @param fileUrlPkcs12Certificate the file url pkcs12 certificate
+		 * @return the daemon builder
+		 */
+		public DaemonBuilder fileUrlPkcs12Certificate(String fileUrlPkcs12Certificate){
+			this.app.fileUrlPkcs12Certificate = fileUrlPkcs12Certificate;
+			return this;
+		}
+		
+		/**
+		 * Certificate secret.
+		 *
+		 * @param certificateSecret the certificate secret
+		 * @return the daemon builder
+		 */
+		public DaemonBuilder certificateSecret(String certificateSecret){
+			this.app.certificateSecret = certificateSecret;
+			return this;
+		}
+		
+		/**
+		 * Client id.
+		 *
+		 * @param clientId the client id
+		 * @return the builder
+		 */
+		public DaemonBuilder clientId(String clientId){
+			this.app.setClientId(clientId);
+			return this;
+		}
+
+		/**
+		 * Client secret.
+		 *
+		 * @param clientSecret the client secret
+		 * @return the builder
+		 */
+		public DaemonBuilder clientSecret(String clientSecret){
+			this.app.setClientSecret(clientSecret);
+			return this;
+		}
+
+		/**
+		 * Redirect uri.
+		 *
+		 * @param redirectUri the redirect uri
+		 * @return the builder
+		 */
+		public DaemonBuilder redirectUri(String redirectUri){
+			this.app.setRedirectUri(redirectUri);
+			return this;
+		}
+
+		/**
+		 * Builds the.
+		 *
+		 * @return the application
+		 */
+		public DaemonApplication build(){
+			this.app.validate();
+			return this.app;
+		}
+		
+	
+	}
+
+	/**
+	 * Validate.
+	 */
+	public void validate() {
+		super.validate();
 	}
 	
 }

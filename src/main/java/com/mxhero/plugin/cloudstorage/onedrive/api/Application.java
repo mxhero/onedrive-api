@@ -15,6 +15,8 @@
  */
 package com.mxhero.plugin.cloudstorage.onedrive.api;
 
+import org.apache.commons.lang.Validate;
+
 /*
  * #%L
  * com.mxhero.plugin.cloudstorage.onedrive
@@ -51,19 +53,6 @@ public class Application {
 	 * Instantiates a new application.
 	 */
 	public Application() {
-	}
-
-	/**
-	 * Instantiates a new application.
-	 *
-	 * @param clientId the client id
-	 * @param redirectUri the redirect uri
-	 * @param clientSecret the client secret
-	 */
-	public Application(String clientId, String redirectUri, String clientSecret) {
-		this.clientId = clientId;
-		this.redirectUri = redirectUri;
-		this.clientSecret = clientSecret;
 	}
 
 	/**
@@ -127,6 +116,76 @@ public class Application {
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this,
 				ToStringStyle.SHORT_PREFIX_STYLE);
+	}
+	
+	/**
+	 * Builder.
+	 *
+	 * @return the builder
+	 */
+	public static Builder builder(){
+		return new Builder();
+	}
+	
+	/**
+	 * The Class Builder.
+	 */
+	public static class Builder {
+		
+		/** The app. */
+		private Application app = new Application();
+		
+		/**
+		 * Client id.
+		 *
+		 * @param clientId the client id
+		 * @return the builder
+		 */
+		public Builder clientId(String clientId){
+			this.app.clientId = clientId;
+			return this;
+		}
+
+		/**
+		 * Client secret.
+		 *
+		 * @param clientSecret the client secret
+		 * @return the builder
+		 */
+		public Builder clientSecret(String clientSecret){
+			this.app.clientSecret = clientSecret;
+			return this;
+		}
+
+		/**
+		 * Redirect uri.
+		 *
+		 * @param redirectUri the redirect uri
+		 * @return the builder
+		 */
+		public Builder redirectUri(String redirectUri){
+			this.app.redirectUri = redirectUri;
+			return this;
+		}
+
+		/**
+		 * Builds the.
+		 *
+		 * @return the application
+		 */
+		public Application build(){
+			this.app.validate();
+			return this.app;
+		}
+		
+	
+	}
+
+	/**
+	 * Validate.
+	 */
+	public void validate() {
+		Validate.notEmpty(clientId, "clientId at least must be present");
 	}
 	
 }

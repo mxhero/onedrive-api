@@ -13,12 +13,24 @@ We have just implemented Support for Business Api. In particular we have impleme
   - Handshaking for obtain first code OAuth2 param should be let by implementations. Check here for more information go [here](https://dev.onedrive.com/auth/aad_oauth.htm#register-your-app-with-azure-active-directory)
 
 
+### OneDrive for Business Api with App Only Tokens
+
+Although this is a feature which is not documented in OneDrive for Business page but it is very important which is to use App Only Tokens for OneDrive for Business.
+
+If you want to know little more about App Only Tokens please visit [here](https://msdn.microsoft.com/en-us/office/office365/howto/building-service-apps-in-office-365).
+
+With this implementation we can impersonate an user across a tenant without needing request for Access and Refresh tokens, but you have to configure your app according documentation above and obviously create the certificate which the App are going to use to provide App Only level Tokens.
+
 Usage
 ----
 
 #### Redeem
 
-    OneDrive.redeem("REDEEM_CODE", "YOUR_CLIENT_ID", "YOUR_REDIRECT_URI", "YOUR_CLIENT_SECRETE");
+    OneDrive.redeem(RedeemRequest.builder()
+    .code("CODE")
+    .clientId("CLIENT_ID")
+    .clientSecret("CLIENT_SECRET")
+    .redirectUri("REDIRECT_URI").build());
 
 Will return:
 
@@ -32,17 +44,40 @@ Will return:
 
 ##### Business Redeem
 
-    OneDrive.redeemBusiness("REDEEM_CODE", "YOUR_CLIENT_ID", "YOUR_CLIENT_SECRET", "YOUR_REDIRECT_URI");
+    OneDrive.redeemBusiness(RedeemRequest.builder()
+    .code("CODE")
+    .clientId("CLIENT_ID")
+    .clientSecret("CLIENT_SECRET")
+    .redirectUri("REDIRECT_URI").build());
 
 Will return:
 
     BusinessCredential.java object
 
+##### App Only Token Redeem
+
+Redeem is not mandatory for App Only Token since if the access token is not provided this SDK will try to get a new Access Token.
+
+    OneDrive.redeemDaemon(RedeemDaemonRequest.builder()
+        .clientId("CLIENT_ID")
+        .resourceSharepointId("RESOURCE_SHAREPOINT_ID")
+        .tenantId("TENANT_ID")
+        .fileUrlPkcs12Certificate("PATH_TO_FILE_PKCS12_CERT_FOR_APP_ONLY_TOKEN") // This is optional since it could be configured through ENV or System Property
+        .certificateSecret("PASSWORD_OF_PKCS12_FILE") // This is optional since it could be configured through ENV or System Property
+        .build());
+
+Will return:
+
+    New Access Token App Only level Token
 
 #### Create Instance
 
     new OneDrive.Builder()
-    				.application(new Application("YOUR_CLIENT_ID", "YOUR_REDIRECT_URI", "YOUR_CLIENT_SECRETE"))
+            .application(Application.builder()
+                .clientId("YOUR_CLIENT_ID")
+                .clientSecret("YOUR_CLIENT_SECRET")
+                .redirectUri("YOUR_REDIRECT_URI")
+                .build())
     				.credential(new Credential.Builder()
     					.accessToken("ACCESS_TOKEN")
     					.refreshToken("REFRESH_TOKEN") //optional, if not present wont try to refresh access tokens
@@ -55,24 +90,70 @@ Will return:
 Instantiating a new OneDrive Client for using Business API only differs from Credential type to be used, because we have to tell SDK which specific Sharepoint URL and Resource Id must be used.
 
     new OneDrive.Builder()
-    				.application(new Application("YOUR_CLIENT_ID", "YOUR_REDIRECT_URI", "YOUR_CLIENT_SECRETE"))
-    				.businessCredential(BusinessCredential.builder()
-    					.sharepointEndpointUri("sharepointUriReturnedByRedeem")
-    					.sharepointResourceId("resourceidReturnedByRedeem")
-    					.accessToken("ACCESS_TOKEN")
-    					.refreshToken("REFRESH_TOKEN") //optional, if not present wont try to refresh access tokens
-    					.user("USER_EMAIL")
-    					.build())
-    				.build();
+    .application(
+      Application.builder()
+      .clientId("YOUR_CLIENT_ID")
+      .clientSecret("YOUR_CLIENT_SECRET")
+      .redirectUri("YOUR_REDIRECT_URI")
+      .build())
+    .businessCredential(BusinessCredential.builder()
+    .sharepointEndpointUri("sharepointUriReturnedByRedeem")
+    .sharepointResourceId("resourceidReturnedByRedeem")
+    .accessToken("ACCESS_TOKEN")
+    .refreshToken("REFRESH_TOKEN") //optional, if not present wont try to refresh access tokens
+    .user("USER_EMAIL")
+    .build())
+    .build();
+
 
 Or you could just send the BusinessCredential response returned by OneDrive.redeemBusiness method.
 
     BusinessCredential businesCredResponse = OneDrive.redeemBusiness("REDEEM_CODE", "YOUR_CLIENT_ID", "YOUR_CLIENT_SECRET", "YOUR_REDIRECT_URI");
 
     OneDrive api = new OneDrive.Builder()
-    				.application(new Application("YOUR_CLIENT_ID", "YOUR_REDIRECT_URI", "YOUR_CLIENT_SECRETE"))
+            .application(Application.builder()
+              .clientId("YOUR_CLIENT_ID")
+              .clientSecret("YOUR_CLIENT_SECRET")
+              .redirectUri("YOUR_REDIRECT_URI")
+              .build())
     				.businessCredential(businesCredResponse)
     				.build();
+
+    api.items().childrenByPath("");
+
+##### Create Instance for OneDrive for Business App Only Token
+This is very similar to instantiate OneDrive for Business or OneDrive Client API. The only thing we need to consider here is the configuration of the Certificate and Secret. Although those params could be passed in OneDrive API instantiation as a param, it should be better to configure either through Environment variable or Java System Property.
+
+1. Environment variables
+
+    ONEDRIVE_DAEMON_PKCS12_FILE_URL=/opt/mykeys/cert.pc12 # Path should be absolute
+    ONEDRIVE_DAEMON_PKCS12_FILE_SECRET=mySecret
+
+2. Java System Properties
+
+    onedrive.daemon.pkcs12.file.url=/opt/mykeys/cert.pc12 # Path should be absolute
+    onedrive.daemon.pkcs12.file.secret=mySecret
+
+
+###### OneDrive client Creation
+
+
+    new OneDrive.Builder()
+    .daemonApplication(DaemonApplication.builderDaemon()
+      .clientId("YOUR_CLIENT_ID")
+      .clientSecret("YOUR_CLIENT_SECRET")
+      .redirectUri("YOUR_REDIRECT_URI")
+      .fileUrlPkcs12Certificate("FILE_PATH_NOT_MANDATORY_USE_ENV_OR_PROP")
+      .certificateSecret("SECRET_FILE_NOT_MANDATORY_USE_ENV_OR_PROP")
+      .build())
+    .daemonCredential(DaemonCredential.builderDaemon()
+    .sharepointEndpointUri("sharepointUriReturnedByRedeem")
+    .sharepointResourceId("resourceidReturnedByRedeem")
+    .accessToken("ACCESS_TOKEN")
+    .tenantId("YOUR_TENANT_ID")
+    .user("USER_EMAIL")
+    .build())
+    .build();
 
     api.items().childrenByPath("");
 
