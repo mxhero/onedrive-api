@@ -204,6 +204,9 @@ public class OneDrive {
 				filePkcs12Secret = redeemDaemonRequest.getCertificateSecret(); 
 			}
 			
+			Validate.notEmpty(filePkcs12, "Pkcs12 Key file path must be provided or configured. You can set it on environment var 'ONEDRIVE_DAEMON_PKCS12_FILE_URL' or through Java System Property 'onedrive.daemon.pkcs12.file.url'");
+			Validate.notEmpty(filePkcs12Secret, "Pkcs12 Secret Key file must be provided or configured. You can set it on environment var 'ONEDRIVE_DAEMON_PKCS12_FILE_SECRET' or through Java System Property 'onedrive.daemon.pkcs12.file.secret'");
+			
 			InputStream pkcs12Certificate = new FileInputStream(filePkcs12);
 			AsymmetricKeyCredential credential = AsymmetricKeyCredential.create(redeemDaemonRequest.getClientId(), pkcs12Certificate, filePkcs12Secret);
 			

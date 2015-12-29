@@ -61,7 +61,6 @@ public class Application {
 	 * @param clientSecret the client secret
 	 */
 	public Application(String clientId, String redirectUri, String clientSecret) {
-		super();
 		this.clientId = clientId;
 		this.redirectUri = redirectUri;
 		this.clientSecret = clientSecret;

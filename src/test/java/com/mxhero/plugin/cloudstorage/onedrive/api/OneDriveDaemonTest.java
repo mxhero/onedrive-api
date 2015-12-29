@@ -15,6 +15,7 @@
  */
 package com.mxhero.plugin.cloudstorage.onedrive.api;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -25,9 +26,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Map;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -40,186 +42,244 @@ import com.mxhero.plugin.cloudstorage.onedrive.api.model.ItemReference;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.Permission;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.ThumbnailSetList;
 
-public class OneDriveTest {
+/**
+ * The Class OneDriveBusinessTest.
+ */
+public class OneDriveDaemonTest {
 	
-	private TestEnviroment testEnviroment;
+	/** The test enviroment. */
+	private static DaemonTestEnviroment testEnviroment;
 	
-	@Before
-	public void beforeClass() throws IOException{
+	/** The api. */
+	private OneDrive api;
+	
+	/**
+	 * Before class.
+	 *
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
+	@BeforeClass
+	public static void beforeClass() throws IOException{
 		if(testEnviroment==null){
 			try{
-				testEnviroment=OneDrive.JACKSON.readValue(new URL(System.getProperty("test.enviroment.json.url")), TestEnviroment.class);
+				testEnviroment=OneDrive.JACKSON.readValue(new URL(System.getProperty("test.enviroment.daemon.json.url")), DaemonTestEnviroment.class);
 			}catch(Exception e){
-				System.out.println(" couldnt read TestEnviroment fro url in SystemProperty test.enviroment.json.url with value "+System.getProperty("test.enviroment.json.url"));
+				System.out.println("This test should be ignore because couldnt read BusinessCredential fro url in SystemProperty test.enviroment.daemon.json.url with value "+System.getProperty("test.enviroment.daemon.json.url"));
 				e.printStackTrace();
 			}
 		}
 	}
 	
+	/**
+	 * Before.
+	 */
+	@Before
+	public void before(){
+		assumeNotNull(testEnviroment);
+		api = createApi();
+	}
+	
+	/**
+	 * Gets the file.
+	 *
+	 * @return the file
+	 */
 	private File getFile(){
 		return new File(Thread.currentThread().getContextClassLoader().getResource("logo_96x96.png").getFile());
 	}
 	
+	/**
+	 * Gets the json file.
+	 *
+	 * @return the json file
+	 */
+	private File getJsonFile(){
+		return new File(Thread.currentThread().getContextClassLoader().getResource("file.json").getFile());
+	}
+	
+	
+	/**
+	 * Creates the api.
+	 *
+	 * @return the one drive
+	 */
 	private OneDrive createApi(){
 		return new OneDrive.Builder()
-				.credential(testEnviroment.getCredential())
+				.businessCredential(testEnviroment.getCredential())
 				.application(testEnviroment.getApplication())
 				.build();
 	}
 	
-	@SuppressWarnings("deprecation")
-	@Ignore
-	@Test
-	public void testRedeem() {
-		assumeNotNull(testEnviroment);
-
-		Map<String, Object> response = OneDrive.redeem("YOUR_REDEEM_CODE"
-				, testEnviroment.getApplication().getClientId()
-				, testEnviroment.getApplication().getRedirectUri()
-				, testEnviroment.getApplication().getClientSecret());
-		assertNotNull(response);
-		System.out.println(response.toString());
-	}
-	
-	@Ignore
-	@Test
-	public void emails() {
-		assumeNotNull(testEnviroment);
-
-		Map<String, Object> response = OneDrive.emails(testEnviroment.getCredential().getAccessToken());
-		assertNotNull(response);
-		System.out.println(response.toString());
-	}
-	
+	/**
+	 * Test drive user default.
+	 */
 	@Test
 	public void testDriveUserDefault(){
-		assumeNotNull(testEnviroment);
-
-		Drive drive = createApi().drives().userDefault();
+		Drive drive = api.drives().userDefault();
 		assertNotNull(drive);
 		System.out.println(drive.toString());
 	}
-	
+
+	/**
+	 * Test drive by id.
+	 */
 	@Test
 	public void testDriveById(){
-		assumeNotNull(testEnviroment);
-
-		Drive drive = createApi().drives().get("bf667a0c62207823");
-		assertNotNull(drive);
-		System.out.println(drive.toString());
+		try {
+			api.drives().get("b!GuF7GLZVSECYDcI0TtAwICr_E1mM2xhLsCNaup9ktWgI5iYvyQbSTbYvei8qjBnS");
+			fail();
+		} catch (NotImplementedException e) {
+		}
 	}
 	
+	/**
+	 * List root childrens.
+	 */
 	@Test
 	public void listRootChildrens(){
-		assumeNotNull(testEnviroment);
-
-		ItemList itemList = createApi().items().childrenByPath("");
+		ItemList itemList = api.items().childrenByPath("");
 		assertNotNull(itemList);
 		System.out.println(itemList.toString());
 	}
 	
+	/**
+	 * List children by path.
+	 */
 	@Test
 	public void listChildrenByPath(){
-		assumeNotNull(testEnviroment);
-
-		ItemList itemList = createApi().items().childrenByPath("Documents");
+		ItemList itemList = api.items().childrenByPath("Documents");
 		assertNotNull(itemList);
 		assertTrue(itemList.getValue().size()>0);
 		System.out.println(itemList.toString());
 	}
 	
+	/**
+	 * Gets the item by id.
+	 *
+	 * @return the item by id
+	 */
 	@Test
 	public void getItemById(){
-		assumeNotNull(testEnviroment);
-		Item item =createApi().items().metadataById("BF667A0C62207823!1912");
+		Item item = api.items().metadataById("01WHV54E2PY7KVF2FPRJHZHA6QXQIXMJVH");
 		assertNotNull(item);
 		System.out.println(item.toString());
 	}
 	
+	/**
+	 * Gets the item by id with parameters.
+	 *
+	 * @return the item by id with parameters
+	 */
 	@Test
 	public void getItemByIdWithParameters(){
-		assumeNotNull(testEnviroment);
-
-		Items items = createApi().items();
-		Item item =items.metadataById("BF667A0C62207823!1912", new Parameters().select("id,name"));
+		Items items = api.items();
+		Item item =items.metadataById("01WHV54E2PY7KVF2FPRJHZHA6QXQIXMJVH", new Parameters().select("id,name"));
 		assertNotNull(item.getName());
 		assertNull(item.getcTag());
 		System.out.println(item.toString());		
-		item=items.metadataById("BF667A0C62207823!1912", new Parameters().expand("children(select=id,name)").select("id,name,children"));
-		assertNotNull(item.getChildren());
-		System.out.println(item.toString());	
 	}
 
+	/**
+	 * Gets the item by path.
+	 *
+	 * @return the item by path
+	 */
 	@Test
 	public void getItemByPath(){
-		assumeNotNull(testEnviroment);
-
-		Items items = createApi().items();
+		Items items = api.items();
 		Item item = items.metadataByPath("demo");
 		assertNotNull(item);
 		System.out.println(item.toString());
 		item = items.metadataByPath("demo/saveAndShare");
 		assertNotNull(item);
 		System.out.println(item.toString());
+		item = items.metadataByPath("demo/Other()");
+		assertNotNull(item);
 	}
 
+	/**
+	 * Search by path.
+	 */
 	@Test
+	@Ignore("Remove ignore when MS team response about Bug in this case")
 	public void searchByPath(){
-		assumeNotNull(testEnviroment);
-
-		ItemList searchResult = createApi().items().searchByPath("Pictures", new Parameters().query("uploadtest.png"));	
-		assertTrue(searchResult.getApproximateCount()>0);
+		ItemList searchResult = api.items().searchByPath("", new Parameters().query("asset1.png"));	
 		assertTrue(searchResult.getValue().size()>0);
 		System.out.println(searchResult);
 	}
 	
+	/**
+	 * Thumbnails.
+	 */
 	@Test
 	public void thumbnails(){
-		assumeNotNull(testEnviroment);
-
-		ThumbnailSetList list = createApi().items().thumbnails("BF667A0C62207823!104", null);	
+		ThumbnailSetList list = api.items().thumbnails("01WHV54E7EEYHNL7TERRHJBZKESEO3C7GI", null);	
 		System.out.println(list);
 		assertTrue(list.getValue().size()>0);
 	}
 	
+	/**
+	 * Simple upload.
+	 */
 	@Test
 	public void simpleUpload(){
-		assumeNotNull(testEnviroment);
-
-		Items items = createApi().items();
-		items.simpleUploadByPath("Pictures"
+		Items items = api.items();
+		Item simpleUploadByPath = items.simpleUploadByPath("Documents"
 				, "uploadtest.png"
 				, getFile()
 				, ConflictBehavior.replace);
-		items.simpleUploadById(items.metadataByPath("Pictures").getId()
+		assertNotNull(simpleUploadByPath);
+		Item simpleUploadById = items.simpleUploadById(items.metadataByPath("Documents").getId()
 				, "uploadtest.png"
 				, getFile()
 				, ConflictBehavior.replace);
+		assertNotNull(simpleUploadById);
 	}
 	
+	/**
+	 * Simple upload authorization exception because invalid file extension.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void simpleUploadIllegalArgumentExceptionBecauseInvalidFileExtension(){
+		Items items = api.items();
+		items.simpleUploadByPath("Documents"
+				, "uploadtest.json"
+				, getJsonFile()
+				, ConflictBehavior.replace);
+		fail();
+	}
+	
+	/**
+	 * Delete.
+	 *
+	 * @throws FileNotFoundException the file not found exception
+	 */
 	@Test
 	public void delete() throws FileNotFoundException{
-		assumeNotNull(testEnviroment);
-		Items items = createApi().items();
-		items.simpleUploadByPath("Pictures"
+		Items items = api.items();
+		items.simpleUploadByPath("Documents"
 				, "delete.png"
 				, getFile()
 				, ConflictBehavior.replace);
-		items.deleteByPath("Pictures/delete.png");
-		assertNull(items.metadataByPath("Pictures/delete.png"));
+		items.deleteByPath("Documents/delete.png");
+		assertNull(items.metadataByPath("Documents/delete.png"));
 	}
 	
+	/**
+	 * Api exception.
+	 *
+	 * @throws FileNotFoundException the file not found exception
+	 */
 	@Test
 	public void apiException() throws FileNotFoundException{
-		assumeNotNull(testEnviroment);
-		Items items = createApi().items();
-		items.deleteByPath("Pictures/delete.png");
-		items.simpleUploadByPath("Pictures"
+		Items items = api.items();
+		items.deleteByPath("Documents/delete.png");
+		items.simpleUploadByPath("Documents"
 				, "delete.png"
 				, getFile()
 				, ConflictBehavior.replace);
 		try{
-		items.simpleUploadByPath("Pictures"
+		items.simpleUploadByPath("Documents"
 				, "delete.png"
 				, getFile()
 				, ConflictBehavior.fail);
@@ -232,15 +292,16 @@ public class OneDriveTest {
 		}
 	}
 	
+	/**
+	 * Copy.
+	 */
 	@Test
 	public void copy(){
-		assumeNotNull(testEnviroment);
-
-		Items items = createApi().items();
-		items.deleteByPath("Pictures/copy_1.png");
-		items.deleteByPath("Pictures/copy.png");
-		Item parent = items.metadataByPath("Pictures");
-		Item copyItem = items.simpleUploadByPath("Pictures"
+		Items items = api.items();
+		items.deleteByPath("Documents/copy_1.png");
+		items.deleteByPath("Documents/copy.png");
+		Item parent = items.metadataByPath("Documents");
+		Item copyItem = items.simpleUploadByPath("Documents"
 				, "copy.png"
 				, getFile()
 				, ConflictBehavior.replace);
@@ -248,25 +309,26 @@ public class OneDriveTest {
 				new ItemReference.Builder().id(parent.getId()).build()
 				, "copy_1.png");
 		long timestamp = System.currentTimeMillis();
-		while(items.metadataByPath("Pictures/copy_1.png")== null && (timestamp+5000)<System.currentTimeMillis()){
+		while(items.metadataByPath("Documents/copy_1.png")== null && (timestamp+5000)<System.currentTimeMillis()){
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
 			}
 		}
-		items.deleteByPath("Pictures/copy_1.png");
-		items.deleteByPath("Pictures/copy.png");
+		assertTrue(items.deleteByPath("Documents/copy_1.png"));
+		assertTrue(items.deleteByPath("Documents/copy.png"));
 	}
 	
+	/**
+	 * Move.
+	 */
 	@Test
 	public void move(){
-		assumeNotNull(testEnviroment);
-
-		Items items = createApi().items();
+		Items items = api.items();
 		items.deleteByPath("Documents/move.png");
-		items.deleteByPath("Pictures/move.png");
+		items.deleteByPath("demo/move.png");
 		Item parent = items.metadataByPath("Documents");
-		Item moveItem = items.simpleUploadByPath("Pictures"
+		Item moveItem = items.simpleUploadByPath("demo"
 				, "move.png"
 				, getFile()
 				, ConflictBehavior.replace);
@@ -279,33 +341,36 @@ public class OneDriveTest {
 			} catch (InterruptedException e) {
 			}
 		}
-		items.deleteByPath("Documents/move.png");
-		items.deleteByPath("Pictures/move.png");
+		assertTrue(items.deleteByPath("Documents/move.png"));
+		assertFalse(items.deleteByPath("demo/move.png"));
 	}
 	
+	/**
+	 * Creates the folder.
+	 */
 	@Test
 	public void createFolder(){
-		assumeNotNull(testEnviroment);
-
-		Items items = createApi().items();
+		Items items = api.items();
 		System.out.println(items.deleteByPath("folder"));
-		System.out.println(items.createFolder("root", "folder.", ConflictBehavior.rename).getId());
-		System.out.println(items.createFolder(items.metadataByPath("folder").getId(), "subfolder", ConflictBehavior.fail));
+		System.out.println(items.createFolder(items.createFolder("root", "folder", ConflictBehavior.rename).getId(), "subfolder", ConflictBehavior.fail));
 		System.out.println(items.deleteByPath("folder"));
-		items.createFolder("root", "marcelo@gmail.com", ConflictBehavior.rename);
+		Item createFolder = items.createFolder("root", "marcelo@gmail.com", ConflictBehavior.rename);
+		assertNotNull(createFolder);
 	}
 	
+	/**
+	 * Creates the link.
+	 */
 	@Test
 	public void createLink(){
-		assumeNotNull(testEnviroment);
-
-		Items items = createApi().items();
-		items.deleteByPath("Pictures/link.png");
-		Item item = items.simpleUploadByPath("Pictures"
+		Items items = api.items();
+		items.deleteByPath("Documents/link.png");
+		Item item = items.simpleUploadByPath("Documents"
 				, "link.png"
 				, getFile()
 				, ConflictBehavior.replace);
 		Permission permission = items.createLinkById(item.getId(), "view");
+		assertNotNull(permission);
 		System.out.println(permission);
 	}
 	

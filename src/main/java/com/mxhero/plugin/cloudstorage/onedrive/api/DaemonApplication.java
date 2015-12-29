@@ -26,6 +26,9 @@ public class DaemonApplication extends Application {
 	/** The certificate secret. */
 	private String certificateSecret;
 	
+	public DaemonApplication() {
+	}
+	
 	/**
 	 * Instantiates a new daemon application.
 	 *

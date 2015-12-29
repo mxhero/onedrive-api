@@ -43,6 +43,7 @@ import com.mxhero.plugin.cloudstorage.onedrive.api.command.Command;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandFactory;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandHandler;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.RefreshBusinessCommand;
+import com.mxhero.plugin.cloudstorage.onedrive.api.command.RefreshDaemonCommand;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.Drive;
 
 
@@ -106,7 +107,7 @@ public class Drives {
 	 */
 	@SuppressWarnings("rawtypes")
 	private void validateImplementation(Command command) {
-		if(command instanceof RefreshBusinessCommand){
+		if(command instanceof RefreshBusinessCommand || command instanceof RefreshDaemonCommand){
 			throw new NotImplementedException("Not implemented yet for Business API");
 		}
 	}
