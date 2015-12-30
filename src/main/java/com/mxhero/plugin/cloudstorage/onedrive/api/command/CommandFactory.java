@@ -15,6 +15,9 @@
  */
 package com.mxhero.plugin.cloudstorage.onedrive.api.command;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /*
  * #%L
  * com.mxhero.plugin.cloudstorage.sharefile
@@ -37,12 +40,13 @@ import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
-import com.mxhero.plugin.cloudstorage.onedrive.api.Credential;
-import com.mxhero.plugin.cloudstorage.onedrive.api.DaemonApplication;
-import com.mxhero.plugin.cloudstorage.onedrive.api.DaemonCredential;
 import com.mxhero.plugin.cloudstorage.onedrive.api.ApiEnviroment;
 import com.mxhero.plugin.cloudstorage.onedrive.api.Application;
 import com.mxhero.plugin.cloudstorage.onedrive.api.BusinessCredential;
+import com.mxhero.plugin.cloudstorage.onedrive.api.Credential;
+import com.mxhero.plugin.cloudstorage.onedrive.api.DaemonApplication;
+import com.mxhero.plugin.cloudstorage.onedrive.api.DaemonCredential;
+import com.mxhero.plugin.cloudstorage.onedrive.api.OneDriveType;
 
 /**
  * A factory for creating RefreshCommand objects.
@@ -57,34 +61,55 @@ public class CommandFactory {
 	
 	/** The application. */
 	private Application application;
+
+	/** The type. */
+	private final OneDriveType type;
+	
+	/** The builders. */
+	@SuppressWarnings("all")
+	private Map<OneDriveType, Class> builders = new HashMap<OneDriveType, Class>(){{
+		put(OneDriveType.onedrive, RefreshCommand.class);
+		put(OneDriveType.ondrive_business, RefreshBusinessCommand.class);
+		put(OneDriveType.onedrive_daemon, RefreshDaemonCommand.class);
+	}};
 	
 	/**
 	 * Instantiates a new command factory.
 	 *
 	 * @param application the application
 	 * @param credential the credential
-	 * @param baseUrl the base url
 	 */
 	public CommandFactory(Application application, Credential credential){
 		Validate.notNull(credential, "credential may not be null");
 		this.credential=credential;
 		this.application=application;
 		this.connManager=httpClientConnectionManager();
+		this.type = delegateTyep();
 	}
 	
+	/**
+	 * Delegate tyep.
+	 *
+	 * @return the one drive type
+	 */
+	private OneDriveType delegateTyep() {
+		if(credential instanceof DaemonCredential && application instanceof DaemonApplication) return OneDriveType.onedrive_daemon;
+		if(credential instanceof BusinessCredential) return OneDriveType.ondrive_business;
+		return OneDriveType.onedrive;
+	}
+
 	/**
 	 * Creates the.
 	 *
 	 * @param <T> the generic type
 	 * @return the command
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> Command<T> create(){
-		if(credential instanceof DaemonCredential && application instanceof DaemonApplication){
-			return new RefreshDaemonCommand<T>(httpClientBuilder(),application,credential);
-		}else if(credential instanceof BusinessCredential){			
-			return new RefreshBusinessCommand<T>(httpClientBuilder(),application,credential);
-		}else{
-			return new RefreshCommand<T>(httpClientBuilder(),application,credential);
+		try {
+			return (Command<T>) builders.get(type).getConstructor(HttpClientBuilder.class, Application.class,Credential.class).newInstance(httpClientBuilder(),application,credential);
+		} catch (Exception e) {
+			throw new IllegalStateException("Error creating factory for builder", e);
 		}
 	}
 	

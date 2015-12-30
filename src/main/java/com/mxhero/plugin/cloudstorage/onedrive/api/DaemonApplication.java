@@ -119,28 +119,6 @@ public class DaemonApplication extends Application {
 		}
 
 		/**
-		 * Client secret.
-		 *
-		 * @param clientSecret the client secret
-		 * @return the builder
-		 */
-		public DaemonBuilder clientSecret(String clientSecret){
-			this.app.setClientSecret(clientSecret);
-			return this;
-		}
-
-		/**
-		 * Redirect uri.
-		 *
-		 * @param redirectUri the redirect uri
-		 * @return the builder
-		 */
-		public DaemonBuilder redirectUri(String redirectUri){
-			this.app.setRedirectUri(redirectUri);
-			return this;
-		}
-
-		/**
 		 * Builds the.
 		 *
 		 * @return the application

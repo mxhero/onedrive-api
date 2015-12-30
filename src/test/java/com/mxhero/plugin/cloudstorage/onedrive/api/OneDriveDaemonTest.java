@@ -105,8 +105,8 @@ public class OneDriveDaemonTest {
 	 */
 	private OneDrive createApi(){
 		return new OneDrive.Builder()
-				.businessCredential(testEnviroment.getCredential())
-				.application(testEnviroment.getApplication())
+				.daemonCredential(testEnviroment.getCredential())
+				.daemonApplication(testEnviroment.getApplication())
 				.build();
 	}
 	
