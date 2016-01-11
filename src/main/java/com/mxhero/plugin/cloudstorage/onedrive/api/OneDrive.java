@@ -15,9 +15,9 @@
  */
 package com.mxhero.plugin.cloudstorage.onedrive.api;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +48,9 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.microsoft.aad.adal4j.AsymmetricKeyCredential;
 import com.microsoft.aad.adal4j.AuthenticationContext;
@@ -233,17 +235,32 @@ public class OneDrive {
 	 */
 	private static String businessEmail(String sharepointUriRoot, String accessToken) {
 		try{
-			HttpGet httpGet = new HttpGet(sharepointUriRoot+"/SP.UserProfiles.PeopleManager/GetMyProperties/Email");
+			HttpGet httpGet = new HttpGet(sharepointUriRoot+"/SP.UserProfiles.PeopleManager/GetMyProperties");
 			httpGet.setHeader("Authorization","Bearer " + accessToken);
 			HttpResponse response = HttpClientBuilder.create().build().execute(httpGet);
-			String responseString = EntityUtils.toString(response.getEntity());
-			logger.info(responseString);
 			if(response.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
-				InputSource is = new InputSource();
-			    is.setCharacterStream(new StringReader(responseString));
 				DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-				Document parse = documentBuilderFactory.newDocumentBuilder().parse(is);
-				return parse.getFirstChild().getTextContent();
+				documentBuilderFactory.setNamespaceAware(true); 
+				Document parse = documentBuilderFactory.newDocumentBuilder().parse(new ByteArrayInputStream(EntityUtils.toByteArray(response.getEntity())));
+				parse.getDocumentElement().normalize();
+				NodeList emailTags = parse.getDocumentElement().getElementsByTagNameNS("*", "Email");
+				if(emailTags.getLength() > 0 && StringUtils.isNotEmpty(emailTags.item(0).getTextContent())){
+					return emailTags.item(0).getTextContent();
+				}
+				NodeList profileProperties = parse.getDocumentElement().getElementsByTagNameNS("*", "element");
+				for (int i = 0; i < profileProperties.getLength(); i++) {
+					Node item = profileProperties.item(i);
+					if(Node.ELEMENT_NODE == item.getNodeType()){
+						Element elem = (Element) item;
+						NodeList keys = elem.getElementsByTagNameNS("*", "Key");
+						NodeList values = elem.getElementsByTagNameNS("*", "Value");
+						if(keys.getLength() > 0 && "UserName".equalsIgnoreCase(keys.item(0).getTextContent())){
+							return values.item(0).getTextContent();
+						}
+					}
+				}
+
+				return null;
 			}
 			throw new RuntimeException("error reading response with code "+response.getStatusLine().getStatusCode());
 		}catch(Exception e){
