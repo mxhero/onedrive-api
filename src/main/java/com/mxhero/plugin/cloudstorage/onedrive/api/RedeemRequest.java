@@ -35,7 +35,13 @@ public class RedeemRequest {
 	
 	/** The redirect uri. */
 	private String redirectUri;
-
+	
+	/** The sharepoint host. */
+	private String sharepointResourceId;
+	
+	/** The sharepoint endpoint uri. */
+	private String sharepointEndpointUri;
+	
 	/**
 	 * Gets the code.
 	 *
@@ -80,11 +86,16 @@ public class RedeemRequest {
 		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
 	
+	/**
+	 * Validate.
+	 */
 	public void validate(){
 		Validate.notEmpty(code, "code field must be provided");
 		Validate.notEmpty(clientId, "clientId field must be provided");
 		Validate.notEmpty(clientSecret, "clientSecret field must be provided");
 		Validate.notEmpty(redirectUri, "redirectUri field must be provided");
+		Validate.notEmpty(sharepointEndpointUri, "sharepointEndpointUri field must be provided");
+		Validate.notEmpty(sharepointResourceId, "sharepointResourceId field must be provided");
 	}
 	
 	/**
@@ -95,7 +106,46 @@ public class RedeemRequest {
 	public static Builder builder(){
 		return new Builder();
 	}
-	
+
+
+	/**
+	 * Gets the sharepoint resource id.
+	 *
+	 * @return the sharepoint resource id
+	 */
+	public String getSharepointResourceId() {
+		return sharepointResourceId;
+	}
+
+	/**
+	 * Sets the sharepoint resource id.
+	 *
+	 * @param sharepointResourceId the new sharepoint resource id
+	 */
+	public void setSharepointResourceId(String sharepointResourceId) {
+		this.sharepointResourceId = sharepointResourceId;
+	}
+
+
+	/**
+	 * Gets the sharepoint endpoint uri.
+	 *
+	 * @return the sharepoint endpoint uri
+	 */
+	public String getSharepointEndpointUri() {
+		return sharepointEndpointUri;
+	}
+
+	/**
+	 * Sets the sharepoint endpoint uri.
+	 *
+	 * @param sharepointEndpointUri the new sharepoint endpoint uri
+	 */
+	public void setSharepointEndpointUri(String sharepointEndpointUri) {
+		this.sharepointEndpointUri = sharepointEndpointUri;
+	}
+
+
 	/**
 	 * The Class Builder.
 	 */
@@ -145,6 +195,29 @@ public class RedeemRequest {
 		 */
 		public Builder redirectUri(String redirectUri){
 			this.instance.redirectUri = redirectUri;
+			return this;
+		}
+		
+		/**
+		 * Sharepoint host.
+		 *
+		 * @param sharepointResourceId the sharepoint resource id
+		 * @return the builder
+		 */
+		public Builder sharepointResourceId(String sharepointResourceId){
+			this.instance.sharepointResourceId = sharepointResourceId;
+			return this;
+		}
+		
+		
+		/**
+		 * Sharepoint endpoint uri.
+		 *
+		 * @param sharepointEndpointUri the sharepoint endpoint uri
+		 * @return the builder
+		 */
+		public Builder sharepointEndpointUri(String sharepointEndpointUri){
+			this.instance.sharepointEndpointUri = sharepointEndpointUri;
 			return this;
 		}
 

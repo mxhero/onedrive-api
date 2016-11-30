@@ -48,6 +48,9 @@ public enum ApiEnviroment {
 		
 	/** The token daemon base url. */
 	tokenDaemonBaseUrl("ONEDRIVE_DAEMON_BASE_URL", "onedrive.daemon.base.url","https://login.microsoftonline.com/%s/oauth2/token"),
+	
+	/** The graph api url. */
+	graphApiUrl("ONEDRIVE_GRAPH_API_URL", "onedrive.graph.url","https://graph.windows.net/"),
 
 	/** The connection request timeout. */
 	connectionRequestTimeout("ONEDRIVE_REQUEST_TIMEOUT", "onedrive.request.timeout","30000"),

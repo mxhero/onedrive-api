@@ -15,7 +15,6 @@
  */
 package com.mxhero.plugin.cloudstorage.onedrive.api;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -25,8 +24,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -47,17 +44,11 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import com.microsoft.aad.adal4j.AsymmetricKeyCredential;
 import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.mxhero.plugin.cloudstorage.onedrive.api.command.CommandFactory;
-import com.mxhero.plugin.cloudstorage.onedrive.api.model.DiscoveryService;
-import com.mxhero.plugin.cloudstorage.onedrive.api.model.DiscoveryServices;
 
 /**
  * The Class OneDrive.
@@ -88,21 +79,6 @@ public class OneDrive {
 	
 	/** The items. */
 	private Items items;
-	
-	/**
-	 * Redeem.
-	 *
-	 * @param code the code
-	 * @param clientId the client id
-	 * @param redirectUri the redirect uri
-	 * @param clientSecret the client secret
-	 * @return the map
-	 * @deprecated Use {@link #redeem(RedeemRequest)} instead
-	 */
-	@Deprecated
-	public static Map<String, Object> redeem(String code, String clientId, String redirectUri, String clientSecret){
-		return redeem(RedeemRequest.builder().code(code).clientId(clientId).clientSecret(clientSecret).redirectUri(redirectUri).build());
-	}
 
 	/**
 	 * Redeem.
@@ -115,28 +91,6 @@ public class OneDrive {
 		params.add(new BasicNameValuePair("code",redeemRequest.getCode()));
 		params.add(new BasicNameValuePair("grant_type","authorization_code"));
 		return redeemNow(ApiEnviroment.tokenBaseUrl.getValue(), params);
-	}
-	
-
-	/**
-	 * Perform entire 4 steps process of Redeem OneDrive for Business API according to documentation {@link https://dev.onedrive.com/auth/aad_oauth.htm}
-	 * 
-	 * Step 1: Redeem the authorization code for tokens
-	 * Step 2: Discover the OneDrive for Business resource URI
-	 * Step 3: Redeem refresh token for an access token to call OneDrive API
-	 * Step 4: It is not documented but retriever Email address for user access token.
-	 *
-	 * @param code the code
-	 * @param clientId the client id
-	 * @param clientSecret the client secret
-	 * @param redirectUri the redirect uri
-	 * @return the one drive business object which encapsulate credential info, such as access and refresh token and sharepoint URL for further OneDrive for Business API calls
-	 * @throws AuthenticationException the authentication exception
-	 * @deprecated Use {@link #redeemBusiness(RedeemRequest)} instead
-	 */
-	@Deprecated
-	public static BusinessCredential redeemBusiness(String code, String clientId, String clientSecret, String redirectUri) throws AuthenticationException{
-		return redeemBusiness(RedeemRequest.builder().code(code).clientId(clientId).clientSecret(clientSecret).redirectUri(redirectUri).build());
 	}
 
 	/**
@@ -153,32 +107,20 @@ public class OneDrive {
 	 */
 	public static BusinessCredential redeemBusiness(RedeemRequest redeemRequest) throws AuthenticationException{
 		try {
-			Discovery discovery = new Discovery();
-			logger.debug("Redeem for OneDrive Business API.");
-			Credential credential = discovery.redeemDiscovery(redeemRequest.getCode(), redeemRequest.getClientId(), redeemRequest.getClientSecret(), redeemRequest.getRedirectUri());
-			logger.debug("Discovery for OneDrive Business API done sucessfully.");
-			DiscoveryServices services = discovery.services(credential);
-			logger.debug("Discovery Services for OneDrive Business API retrieved {}", services);
-			DiscoveryService oneDriveBusiness = services.oneDriveBusiness();
-			DiscoveryService rootSharepoint = services.rootSharepoint();
-			if(oneDriveBusiness != null && rootSharepoint!=null){
-				Map<String, Object> redeemBusinessApiRootSharepoint = redeemBusinessApi(rootSharepoint.getServiceResourceId(), redeemRequest.getClientId(), redeemRequest.getClientSecret(), redeemRequest.getRedirectUri(), credential.getRefreshToken());				
-				String userEmail = businessEmail(rootSharepoint.getServiceEndpointUri(), (String)redeemBusinessApiRootSharepoint.get("access_token"));
-				Map<String, Object> redeemBusinessApi = redeemBusinessApi(oneDriveBusiness.getServiceResourceId(), redeemRequest.getClientId(), redeemRequest.getClientSecret(), redeemRequest.getRedirectUri(), credential.getRefreshToken());
-				logger.debug("Redeem for OneDrive Business API sharepoint specific URL {}", oneDriveBusiness);
-				return BusinessCredential.builder()
-						.sharepointEndpointUri(oneDriveBusiness.getServiceEndpointUri())
-						.sharepointResourceId(oneDriveBusiness.getServiceResourceId())
-						.accessToken((String)redeemBusinessApi.get("access_token"))
-						.refreshToken((String)redeemBusinessApi.get("refresh_token"))
-						.tokenType((String)redeemBusinessApi.get("token_type"))
-						.user(userEmail)
-						.build();
-			}else{
-				throw new AuthenticationException("User doesnt have OneDrive Business API enabled");
-			}
+			Map<String, Object> redeemBusinessApiResource = redeemBusinessApiResource(ApiEnviroment.graphApiUrl.getValue(), redeemRequest.getClientId(), redeemRequest.getClientSecret(), redeemRequest.getRedirectUri(), redeemRequest.getCode());
+			Map<String, Object> redeemBusinessApi = redeemBusinessApiResource(redeemRequest.getSharepointResourceId(), redeemRequest.getClientId(), redeemRequest.getClientSecret(), redeemRequest.getRedirectUri(), redeemRequest.getCode());
+			String userEmail = businessEmail((String)redeemBusinessApiResource.get("access_token"));
+			logger.debug("Redeem for OneDrive Business API sharepoint specific URL {}", redeemBusinessApi);
+			return BusinessCredential.builder()
+					.sharepointEndpointUri(redeemRequest.getSharepointEndpointUri())
+					.sharepointResourceId(redeemRequest.getSharepointResourceId())
+					.accessToken((String)redeemBusinessApi.get("access_token"))
+					.refreshToken((String)redeemBusinessApi.get("refresh_token"))
+					.tokenType((String)redeemBusinessApi.get("token_type"))
+					.user(userEmail)
+					.build();
 		} catch (Exception e) {
-			throw new AuthenticationException("Could not redeem code "+redeemRequest.getCode()+" for Discovery API");			
+			throw new AuthenticationException("Could not redeem code "+redeemRequest.getCode()+" for OneDrive Business API");			
 		}
 	}
 	
@@ -233,34 +175,23 @@ public class OneDrive {
 	 * @param accessToken the access token
 	 * @return the string
 	 */
-	private static String businessEmail(String sharepointUriRoot, String accessToken) {
+	@SuppressWarnings("unchecked")
+	private static String businessEmail(String accessToken) {
 		try{
-			HttpGet httpGet = new HttpGet(sharepointUriRoot+"/SP.UserProfiles.PeopleManager/GetMyProperties");
+			
+			URIBuilder builder = new URIBuilder(ApiEnviroment.graphApiUrl.getValue()+"me");
+			builder.addParameter("api-version", "1.6");
+			HttpGet httpGet = new HttpGet(builder.toString());
 			httpGet.setHeader("Authorization","Bearer " + accessToken);
+			
 			HttpResponse response = HttpClientBuilder.create().build().execute(httpGet);
 			if(response.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
-				DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-				documentBuilderFactory.setNamespaceAware(true); 
-				Document parse = documentBuilderFactory.newDocumentBuilder().parse(new ByteArrayInputStream(EntityUtils.toByteArray(response.getEntity())));
-				parse.getDocumentElement().normalize();
-				NodeList emailTags = parse.getDocumentElement().getElementsByTagNameNS("*", "Email");
-				if(emailTags.getLength() > 0 && StringUtils.isNotEmpty(emailTags.item(0).getTextContent())){
-					return emailTags.item(0).getTextContent();
+				Map<String, Object> responseObject = (Map<String, Object>) OneDrive.JACKSON.readValue(EntityUtils.toString(response.getEntity()), Map.class);
+				if(responseObject.containsKey("userPrincipalName")){
+					return (String) responseObject.get("userPrincipalName");
+				}else{
+					return (String) responseObject.get("mail");
 				}
-				NodeList profileProperties = parse.getDocumentElement().getElementsByTagNameNS("*", "element");
-				for (int i = 0; i < profileProperties.getLength(); i++) {
-					Node item = profileProperties.item(i);
-					if(Node.ELEMENT_NODE == item.getNodeType()){
-						Element elem = (Element) item;
-						NodeList keys = elem.getElementsByTagNameNS("*", "Key");
-						NodeList values = elem.getElementsByTagNameNS("*", "Value");
-						if(keys.getLength() > 0 && "UserName".equalsIgnoreCase(keys.item(0).getTextContent())){
-							return values.item(0).getTextContent();
-						}
-					}
-				}
-
-				return null;
 			}
 			throw new RuntimeException("error reading response with code "+response.getStatusLine().getStatusCode());
 		}catch(Exception e){
@@ -275,13 +206,13 @@ public class OneDrive {
 	 * @param clientId the client id
 	 * @param clientSecret the client secret
 	 * @param redirectUri the redirect uri
-	 * @param refreshToken the refresh token
+	 * @param code the code
 	 * @return the map
 	 */
-	private static Map<String, Object> redeemBusinessApi(String resourceId, String clientId, String clientSecret, String redirectUri, String refreshToken){
+	private static Map<String, Object> redeemBusinessApiResource(String resourceId, String clientId, String clientSecret, String redirectUri, String code){
 		List<BasicNameValuePair> params = buildParams(clientId, redirectUri, clientSecret);
-		params.add(new BasicNameValuePair("refresh_token",refreshToken));
-		params.add(new BasicNameValuePair("grant_type","refresh_token"));
+		params.add(new BasicNameValuePair("code", code));
+		params.add(new BasicNameValuePair("grant_type","authorization_code"));
 		params.add(new BasicNameValuePair("resource",resourceId));
 		return redeemNow(ApiEnviroment.tokenBusinessBaseUrl.getValue(), params);
 	}

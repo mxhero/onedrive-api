@@ -66,21 +66,7 @@ public class OneDriveTest {
 				.application(testEnviroment.getApplication())
 				.build();
 	}
-	
-	@SuppressWarnings("deprecation")
-	@Ignore
-	@Test
-	public void testRedeem() {
-		assumeNotNull(testEnviroment);
-
-		Map<String, Object> response = OneDrive.redeem("YOUR_REDEEM_CODE"
-				, testEnviroment.getApplication().getClientId()
-				, testEnviroment.getApplication().getRedirectUri()
-				, testEnviroment.getApplication().getClientSecret());
-		assertNotNull(response);
-		System.out.println(response.toString());
-	}
-	
+		
 	@Ignore
 	@Test
 	public void emails() {
