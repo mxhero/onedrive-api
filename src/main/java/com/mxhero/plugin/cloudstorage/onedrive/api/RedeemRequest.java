@@ -94,8 +94,6 @@ public class RedeemRequest {
 		Validate.notEmpty(clientId, "clientId field must be provided");
 		Validate.notEmpty(clientSecret, "clientSecret field must be provided");
 		Validate.notEmpty(redirectUri, "redirectUri field must be provided");
-		Validate.notEmpty(sharepointEndpointUri, "sharepointEndpointUri field must be provided");
-		Validate.notEmpty(sharepointResourceId, "sharepointResourceId field must be provided");
 	}
 	
 	/**
