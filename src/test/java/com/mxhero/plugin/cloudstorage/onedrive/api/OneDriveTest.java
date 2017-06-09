@@ -174,11 +174,11 @@ public class OneDriveTest {
 
 		Items items = createApi().items();
 		items.simpleUploadByPath("Pictures"
-				, "uploadtest.png"
+				, "[uploadtest].png"
 				, getFile()
 				, ConflictBehavior.replace);
 		items.simpleUploadById(items.metadataByPath("Pictures").getId()
-				, "uploadtest.png"
+				, "[uploadtest].png"
 				, getFile()
 				, ConflictBehavior.replace);
 	}
