@@ -18,6 +18,7 @@ package com.mxhero.plugin.cloudstorage.onedrive.api;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +51,6 @@ import com.mxhero.plugin.cloudstorage.onedrive.api.model.ItemList;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.ItemReference;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.Permission;
 import com.mxhero.plugin.cloudstorage.onedrive.api.model.ThumbnailSetList;
-import com.mxhero.plugin.cloudstorage.onedrive.api.utils.URLEncoder;
 
 /**
  * The Class Items.
@@ -901,7 +901,12 @@ public class Items {
 					segmentWithoutDot = segmentWithoutDot.substring(1);
 				}
 				String toEncode = segmentWithoutDot.replaceAll(RESERVED_CHARACTERS_PATTERN, " ").trim();
-				cleanPath += URLEncoder.encode(toEncode)+"/";
+				try {
+					cleanPath += new URIBuilder().setPath(toEncode).build().toString()+"/";
+				} catch (URISyntaxException e) {
+					cleanPath += toEncode+"/";
+					logger.warn("onedrive_api_could_not_encode_url", toEncode);
+				}
 			}
 			return cleanPath.substring(0,cleanPath.length()-1);
 		}

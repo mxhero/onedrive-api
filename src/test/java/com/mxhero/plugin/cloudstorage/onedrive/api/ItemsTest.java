@@ -15,11 +15,11 @@
  */
 package com.mxhero.plugin.cloudstorage.onedrive.api;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
+import java.io.UnsupportedEncodingException;
 
 import org.junit.Test;
-
-import com.mxhero.plugin.cloudstorage.onedrive.api.Items;
 
 public class ItemsTest {
 
@@ -38,5 +38,11 @@ public class ItemsTest {
 	public void testCleanAndEncodePathNotAllowedCharactersRemoved(){
 		assertEquals("Documents/one%20%20test/test%20%20%20this()",Items.cleanAndEncodePath("Documents/.one &test/.test{} this()~"));
 	}
+	
+	@Test
+	public void testCleanAndEncodePath2() throws UnsupportedEncodingException{
+		assertEquals("Sharp%E2%80%99s%20Questions_20170630.pdf",Items.cleanAndEncodePath("Sharp’s Questions_20170630.pdf"));
+	}
+	
 	
 }
