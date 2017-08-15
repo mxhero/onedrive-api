@@ -284,6 +284,17 @@ public class OneDrive {
 	}
 	
 	/**
+	 * Reserved characters type.
+	 *
+	 * @param reservedCharactersType the reserved characters type
+	 * @return the one drive
+	 */
+	public OneDrive reservedCharactersType(ReservedCharactersType reservedCharactersType){
+		this.items().reservedCharactersType(reservedCharactersType);
+		return this;
+	}
+	
+	/**
 	 * Drives.
 	 *
 	 * @return the drives
