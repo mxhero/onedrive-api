@@ -41,8 +41,13 @@ public class ItemsTest {
 	
 	@Test
 	public void testCleanAndEncodePath2() throws UnsupportedEncodingException{
+		if(isWindows()){
+			return;
+		}
 		assertEquals("Sharp%E2%80%99s%20Questions_20170630.pdf",Items.cleanAndEncodePath(ReservedCharactersType.sharepoint_2013,"Sharp’s Questions_20170630.pdf"));
 	}
 	
-	
+	 private boolean isWindows() {
+	      return System.getProperty("os.name").startsWith("Windows");
+	    }
 }
