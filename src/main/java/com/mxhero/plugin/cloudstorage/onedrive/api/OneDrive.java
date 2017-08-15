@@ -79,6 +79,9 @@ public class OneDrive {
 	
 	/** The items. */
 	private Items items;
+	
+	/** The reserved characters type. */
+	private ReservedCharactersType reservedCharactersType = ReservedCharactersType.sharepoint_2013;
 
 	/**
 	 * Redeem.
@@ -171,7 +174,6 @@ public class OneDrive {
 	/**
 	 * Business email.
 	 *
-	 * @param sharepointUriRoot the sharepoint uri root
 	 * @param accessToken the access token
 	 * @return the string
 	 */
@@ -387,6 +389,34 @@ public class OneDrive {
 		}
 		
 		/**
+		 * Reserved characters type.
+		 *
+		 * @param reservedCharactersType the reserved characters type
+		 * @return the builder
+		 */
+		public Builder reservedCharactersType(ReservedCharactersType reservedCharactersType){
+			if(reservedCharactersType!=null){
+				this.instance.reservedCharactersType = reservedCharactersType;
+			}
+			return this;
+		}
+		
+		/**
+		 * Reserved characters type.
+		 *
+		 * @param reservedCharactersType the reserved characters type
+		 * @return the builder
+		 */
+		public Builder reservedCharactersType(String reservedCharactersType){
+			try{
+				return reservedCharactersType(ReservedCharactersType.valueOf(reservedCharactersType));
+			}catch(Exception e){
+				logger.warn("set_reserved_characters_type_failed:"+reservedCharactersType,e);
+			}
+			return this;
+		}
+		
+		/**
 		 * Builds the.
 		 *
 		 * @return the one drive
@@ -395,11 +425,9 @@ public class OneDrive {
 			instance.validate();
 			instance.commandFactory=new CommandFactory(this.instance.application, this.instance.credential);
 			instance.drives = new Drives(instance.commandFactory);
-			instance.items = new Items(instance.commandFactory);
+			instance.items = new Items(instance.commandFactory).reservedCharactersType(instance.reservedCharactersType);
 			return instance;
 		}
-		
-		
 		
 	}
 	

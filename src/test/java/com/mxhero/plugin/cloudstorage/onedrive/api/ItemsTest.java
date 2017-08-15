@@ -25,23 +25,23 @@ public class ItemsTest {
 
 	@Test
 	public void testCleanAndEncodePath(){
-		assertEquals("Documents/one%20test/test%20this()",Items.cleanAndEncodePath("Documents/one test/ test this()"));
+		assertEquals("Documents/one%20test/test%20this()",Items.cleanAndEncodePath(ReservedCharactersType.sharepoint_2013,"Documents/one test/ test this()"));
 	}
 	
 	@Test
 	public void testCleanAndEncodePathStartingWithDotRemoved(){
-		assertEquals("Documents/one%20test/test%20this()",Items.cleanAndEncodePath("Documents/.one test/.test this()"));
-		assertEquals("Documents/one%20test/test%20this()",Items.cleanAndEncodePath("Documents/~one test/.test this()"));
+		assertEquals("Documents/one%20test/test%20this()",Items.cleanAndEncodePath(ReservedCharactersType.sharepoint_2013,"Documents/.one test/.test this()"));
+		assertEquals("Documents/one%20test/test%20this()",Items.cleanAndEncodePath(ReservedCharactersType.sharepoint_2013,"Documents/~one test/.test this()"));
 	}
 	
 	@Test
 	public void testCleanAndEncodePathNotAllowedCharactersRemoved(){
-		assertEquals("Documents/one%20%20test/test%20%20%20this()",Items.cleanAndEncodePath("Documents/.one &test/.test{} this()~"));
+		assertEquals("Documents/one%20%20test/test%20%20%20this()",Items.cleanAndEncodePath(ReservedCharactersType.sharepoint_2013,"Documents/.one &test/.test{} this()~"));
 	}
 	
 	@Test
 	public void testCleanAndEncodePath2() throws UnsupportedEncodingException{
-		assertEquals("Sharp%E2%80%99s%20Questions_20170630.pdf",Items.cleanAndEncodePath("Sharp’s Questions_20170630.pdf"));
+		assertEquals("Sharp%E2%80%99s%20Questions_20170630.pdf",Items.cleanAndEncodePath(ReservedCharactersType.sharepoint_2013,"Sharp’s Questions_20170630.pdf"));
 	}
 	
 	

@@ -60,9 +60,6 @@ public class Items {
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(Items.class);
 	
-	/** The Constant RESERVED_CHARACTERS_PATTERN. */
-	public static final String RESERVED_CHARACTERS_PATTERN = "[/\\*<>?:|#%\"\\$\\{\\}~\\&]";
-	
 	/** The Constant DRIVE_ITEMS. */
 	public static final String ITEMS = "/items/";
 	
@@ -83,6 +80,9 @@ public class Items {
 	
 	/** The command factory. */
 	private CommandFactory commandFactory;
+	
+	/** The reserved characters type. */
+	private ReservedCharactersType reservedCharactersType = ReservedCharactersType.sharepoint_2013;
 	
 	/**
 	 * The Enum ConflictBehavior.
@@ -106,6 +106,17 @@ public class Items {
 	 */
 	public Items(CommandFactory commandFactory){
 		this.commandFactory=commandFactory;
+	}
+	
+	/**
+	 * Reserved characters type.
+	 *
+	 * @param reservedCharactersType the reserved characters type
+	 * @return the items
+	 */
+	public Items reservedCharactersType(ReservedCharactersType reservedCharactersType){
+		this.reservedCharactersType=reservedCharactersType;
+		return this;
 	}
 	
 	/**
@@ -147,7 +158,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item metadataByPath(String path, Parameters odata){
-		return this.itemGet(ROOT+((StringUtils.isNotBlank(path))?":/"+cleanAndEncodePath(path):""),odata);
+		return this.itemGet(ROOT+((StringUtils.isNotBlank(path))?":/"+cleanAndEncodePath(this.reservedCharactersType,path):""),odata);
 	}
 	
 	/**
@@ -189,7 +200,7 @@ public class Items {
 	 * @return the item list
 	 */
 	public ItemList childrenByPath(String path, Parameters odata){
-		return this.itemListGet(ROOT+((StringUtils.isNotBlank(path))?(":/"+cleanAndEncodePath(path)+":"):"")+CHILDREN, odata);
+		return this.itemListGet(ROOT+((StringUtils.isNotBlank(path))?(":/"+cleanAndEncodePath(this.reservedCharactersType,path)+":"):"")+CHILDREN, odata);
 	}
 	
 	/**
@@ -200,7 +211,7 @@ public class Items {
 	 * @return the item list
 	 */
 	public ItemList searchByPath(String path, Parameters odata){
-		return this.itemListGet(ROOT+((StringUtils.isNotBlank(path))?(":/"+cleanAndEncodePath(path)+":/"):"")+SEARCH, odata);		
+		return this.itemListGet(ROOT+((StringUtils.isNotBlank(path))?(":/"+cleanAndEncodePath(this.reservedCharactersType,path)+":/"):"")+SEARCH, odata);		
 	}
 	
 	/**
@@ -231,7 +242,7 @@ public class Items {
 	 * @return the boolean
 	 */
 	public Boolean deleteByPath(String path){
-		return this.deleteItem(ROOT+":/"+cleanAndEncodePath(path));
+		return this.deleteItem(ROOT+":/"+cleanAndEncodePath(this.reservedCharactersType,path));
 	}
 	
 	/**
@@ -253,7 +264,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item updateByPath(String path, Item item){
-		return this.updateItem(ROOT+":/"+cleanAndEncodePath(path), item);
+		return this.updateItem(ROOT+":/"+cleanAndEncodePath(this.reservedCharactersType,path), item);
 	}
 	
 	/**
@@ -266,7 +277,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadByPath(String path, String name, InputStream inputStream, ConflictBehavior conflictBehavior){
-		return simpleUploadStream(ROOT+":/"+cleanAndEncodePath(path)+"/"+cleanAndEncodeAndShortPath(name)+":"+CONTENT, inputStream, conflictBehavior);
+		return simpleUploadStream(ROOT+":/"+cleanAndEncodePath(this.reservedCharactersType,path)+"/"+cleanAndEncodeAndShortPath(this.reservedCharactersType,name)+":"+CONTENT, inputStream, conflictBehavior);
 	}
 	
 	/**
@@ -279,7 +290,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadByPath(String path, String name, File file, ConflictBehavior conflictBehavior){
-		return simpleUpload(ROOT+":/"+cleanAndEncodePath(path)+"/"+cleanAndEncodeAndShortPath(name)+":"+CONTENT, file, conflictBehavior);
+		return simpleUpload(ROOT+":/"+cleanAndEncodePath(this.reservedCharactersType,path)+"/"+cleanAndEncodeAndShortPath(this.reservedCharactersType,name)+":"+CONTENT, file, conflictBehavior);
 	}
 	
 	/**
@@ -292,7 +303,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadById(String parentId, String name, InputStream inputStream, ConflictBehavior conflictBehavior){
-		return simpleUploadStream(ITEMS+parentId+CHILDREN+"/"+cleanAndEncodeAndShortPath(name)+CONTENT, inputStream, conflictBehavior);
+		return simpleUploadStream(ITEMS+parentId+CHILDREN+"/"+cleanAndEncodeAndShortPath(this.reservedCharactersType,name)+CONTENT, inputStream, conflictBehavior);
 	}
 	
 	/**
@@ -305,7 +316,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item simpleUploadById(String parentId, String name, File file, ConflictBehavior conflictBehavior){
-		return simpleUpload(ITEMS+parentId+CHILDREN+"/"+cleanAndEncodeAndShortPath(name)+CONTENT, file, conflictBehavior);
+		return simpleUpload(ITEMS+parentId+CHILDREN+"/"+cleanAndEncodeAndShortPath(this.reservedCharactersType,name)+CONTENT, file, conflictBehavior);
 	}
 
 	/**
@@ -325,7 +336,7 @@ public class Items {
 	 * @return the string
 	 */
 	public String downloadUrlByPath(String path){
-		return getDownloadUrl(ROOT+":/"+cleanAndEncodePath(path)+":"+CONTENT);
+		return getDownloadUrl(ROOT+":/"+cleanAndEncodePath(this.reservedCharactersType,path)+":"+CONTENT);
 	}
 	
 	/**
@@ -359,7 +370,7 @@ public class Items {
 	 * @return the string
 	 */
 	public String copyByPath(String path, ItemReference parentReference){
-		return postCopy(ROOT+":/"+cleanAndEncodePath(path)+":"+COPY,parentReference,null);
+		return postCopy(ROOT+":/"+cleanAndEncodePath(this.reservedCharactersType,path)+":"+COPY,parentReference,null);
 	}
 	
 	/**
@@ -371,7 +382,7 @@ public class Items {
 	 * @return the string
 	 */
 	public String copyByPath(String path, ItemReference parentReference, String name){
-		return postCopy(ROOT+":/"+cleanAndEncodePath(path)+":"+COPY,parentReference,name);
+		return postCopy(ROOT+":/"+cleanAndEncodePath(this.reservedCharactersType,path)+":"+COPY,parentReference,name);
 	}
 	
 	/**
@@ -393,7 +404,7 @@ public class Items {
 	 * @return the item
 	 */
 	public Item moveByPath(String path, ItemReference parentReference){
-		return patchMove(ROOT+":/"+cleanAndEncodePath(path), parentReference);
+		return patchMove(ROOT+":/"+cleanAndEncodePath(this.reservedCharactersType,path), parentReference);
 	}
 
 	/**
@@ -415,7 +426,7 @@ public class Items {
 	 * @return the permission
 	 */
 	public Permission createLinkByPath(String path, String type){
-		return postCreateLink(ROOT+":/"+cleanAndEncodePath(path)+":/action.createLink", type);
+		return postCreateLink(ROOT+":/"+cleanAndEncodePath(this.reservedCharactersType,path)+":/action.createLink", type);
 	}
 	
 	/**
@@ -590,7 +601,7 @@ public class Items {
 					}
 					body.put("parentReference", parentReference);
 					if(StringUtils.isNotBlank(name)){
-						body.put("name",name.replaceAll(RESERVED_CHARACTERS_PATTERN, " ").trim());
+						body.put("name",name.replaceAll(reservedCharactersType.reservedCharacters(), " ").trim());
 					}
 					httpPost.setEntity(new StringEntity(OneDrive.JACKSON.writeValueAsString(body), "UTF-8"));
 					return httpPost;
@@ -690,6 +701,7 @@ public class Items {
 	 */
 	public Item createFolder(final String parentId, final String name, final ConflictBehavior conflictBehavior){
 		final Command<Item> command = commandFactory.create();
+		final ReservedCharactersType reservedCharactersType = this.reservedCharactersType;
 		command.validate(Validator.builder().folder().name(name).build());
 		return command.excecute(new CommandHandler<Item>() {
 			
@@ -719,7 +731,7 @@ public class Items {
 				HttpPost httpPost = new HttpPost(postUrl);
 				httpPost.setHeader("Content-type", "application/json");
 				Map<String, Object> item = new HashMap<>();
-				item.put("name", cleanAndShortName(name).replaceAll("\\.*$", ""));
+				item.put("name", cleanAndShortName(reservedCharactersType, name));
 				item.put("folder", new HashMap<>());
 				item.put("@name.conflictBehavior", conflictBehavior.name());
 				try {
@@ -889,10 +901,11 @@ public class Items {
 	/**
 	 * Clean and encode path.
 	 *
+	 * @param reservedCharactersType the reserved characters type
 	 * @param path the path
 	 * @return the string
 	 */
-	public static String cleanAndEncodePath(String path){
+	public static String cleanAndEncodePath(ReservedCharactersType reservedCharactersType, String path){
 		if(path!=null){
 			String cleanPath="";
 			for(String segment : path.split("/")){
@@ -900,7 +913,7 @@ public class Items {
 				if(segmentWithoutDot.startsWith(".") || segmentWithoutDot.startsWith("~")){
 					segmentWithoutDot = segmentWithoutDot.substring(1);
 				}
-				String toEncode = segmentWithoutDot.replaceAll(RESERVED_CHARACTERS_PATTERN, " ").trim();
+				String toEncode = segmentWithoutDot.replaceAll(reservedCharactersType.reservedCharacters(), " ").trim();
 				try {
 					cleanPath += new URIBuilder().setPath(toEncode).build().toString()+"/";
 				} catch (URISyntaxException e) {
@@ -916,12 +929,13 @@ public class Items {
 	/**
 	 * Clean and short name.
 	 *
+	 * @param reservedCharactersType the reserved characters type
 	 * @param path the path
 	 * @return the string
 	 */
-	public static String cleanAndShortName(String path){
+	public static String cleanAndShortName(ReservedCharactersType reservedCharactersType, String path){
 		if(path!=null){
-			String processedPath = path.replaceAll(RESERVED_CHARACTERS_PATTERN, " ").trim();
+			String processedPath = path.replaceAll(reservedCharactersType.reservedCharacters(), " ").trim();
 			if(processedPath.length()>Integer.parseInt(ApiEnviroment.maxFileAndFolderLenght.getValue())){
 				processedPath = processedPath.substring(0, Integer.parseInt(ApiEnviroment.maxFileAndFolderLenght.getValue()));
 			}
@@ -933,12 +947,13 @@ public class Items {
 	/**
 	 * Clean and encode and short path.
 	 *
+	 * @param reservedCharactersType the reserved characters type
 	 * @param path the path
 	 * @return the string
 	 */
-	public static String cleanAndEncodeAndShortPath(String path){
+	public static String cleanAndEncodeAndShortPath(ReservedCharactersType reservedCharactersType, String path){
 		if(path!=null){
-			String processedPath = cleanAndEncodePath(path);
+			String processedPath = cleanAndEncodePath(reservedCharactersType,path);
 			if(processedPath.length()>Integer.parseInt(ApiEnviroment.maxFileAndFolderLenght.getValue())){
 				processedPath = processedPath.substring(0, Integer.parseInt(ApiEnviroment.maxFileAndFolderLenght.getValue()));
 			}

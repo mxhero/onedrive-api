@@ -1,1 +1,26 @@
-{"myjson": true}
+{"application": {
+	  "id": "6e83b8b826dd345c4b53cc56f2e9812d",
+	  "name": "One Drive Stage",
+	  "type": "onedrive",
+	  "provider_type": "cloud_storage_oauth",
+	  "provider_data": {
+	    "client_id": "000000004C161C4E",
+	    "client_secret": "58qpVs7csttpqtTablGRhA4h4pJHtLXn",
+	    "redirect_uri": "https://stage.mxhero.com/oauthapi/onedrive/callback"
+	  }
+	},
+ "credential":{
+	  "access_token": "EwAAA61DBAAUGCCXc8wU/zFu9QnLdZXy+YnElFkAAbyyAPGRmF8ZzP0+/p6mqMLlnoTS9FTmp/iYpfGhZjmfGZn5APsYDIy1INtloZ7f+pfTgZyrUTQBXMqBrSi5msREDKm6EdkDJbML6tGd9qX5fgQwdW+iWzRMHwpViZLuib13d4zx5JTwZe0gTz9mRPsu2iLZX0khg796m5scjnizpwer74+PDjG/LwkaCRt+LWAdCluiIVGPkAKQ1CMH0iPNTSp7UKg7WTWzUGs033jlpQpgme24vAS9wdB90qAEwFxmVD5TxDl0P1Sdup5B/oAnHGdFJYSSOEHKEP5nztnZ/a/j3sjII2wNK8k4/+VwETOAfNhe6hzbJyiLDWuw5YoDZgAACA/mJT5DSzIe0AHPrlHTnOhmb7DP7hK0eO6FWXqar1+lmKC0cz4w2Ew4KznTGKKPFGU8s0ILEmGCU7yhhvDblXCZY0um/yt5XU8jXzdFgsrQ5oLhWzkguQV6uuiIfeCnJW689Ji9/84Wgl62SI0QS6JruQ3X/CXxlxt5LrnyZLpFlWNCeK42NkhSCe5tnFSbC0sKJMuG3w/Hkurpoxov4Fupiho8K1j3lAN9m6y0tjpjNBGRaiUVKqNQqa+YqnBPyDTu0w1rg9Z7z3NKGAbPI34IT8cT9UiyHGbcjLuw3ZG2syMtBMCk9H9xvWhq/iqm3t00IEuFElvQzz5GbGcfnTf6A3ZSgLjZOVokBOcHEITDBh6ukhuBnWnqFlMBNTAsEhE4x6OJ99J2ayHmUd+vPAoIIhU83NYbn+cfmDEtSlCszEczs9Pfao8GfE+ETylV6cNNYM1o29SG4pxu6QeJ0rctqUutDMU+MP4BmAyJuwxPweIAjWCqqTSgkEKAjaRW/e4aPi4W7JEyoyXddAfnk2prQ7Odq1nWkOnuer39hggVrpZgaoG3EQ5fDSWkWD5LMBxJmDBwLVOckIemM9YIkvCBcZuOrlmtKdM0eZvz6w5kJbu3157DNE+3bAkC",
+	  "refresh_token": "MCRRu8BKN0xBLiXj8cukixP6qB6XglmOkfI15z44N0G2s8h2WWRosL6Mpw0l9z6dr2o0feY6fPab5Ne7QfDryd5oQvLRmYcwIbuj0cadDYUw77oh!gHemY7xYQPNz2idpPTn0sEJ1Jz8Gl3aOcFxhWs9kbxO5sWgEgneI3Tyuo7Epen8VLp2Z9vfDGIuwLNgIiRE9QkuQIpvIyRdO!D*K23TGuyIY7GGOwm!D9Gp6Uk33KnI*4sg7OqadlFljvJ5EKwbA0l2DOv!*FWvaMmMMJ1qubRd0B8TxZBjfllrs*EZWDTZfDsUimpUeuZr2yYZV!lyT3ML65hWCPsrHlPbC87BuLuHtSpEOpnzxcabA2kJ9zeCEzSUQ98v40zh2XYgUIkrPvp*2ZMXy!Aku7ycvp1E$",
+	  "data": {
+	    "user_id": "1877634faa15db200cee55c9b1d51ef5",
+	    "scope": "wl.signin wl.offline_access wl.emails onedrive.readwrite"
+	  },
+	  "application": "6e83b8b826dd345c4b53cc56f2e9812d",
+	  "created_at": 1502825904720,
+	  "token_type": "bearer",
+	  "user": "mmarmol@mxhero.com",
+	  "expires_in": 3600,
+	  "issued_at": 1502825904720
+	}
+}
