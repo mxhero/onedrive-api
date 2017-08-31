@@ -921,7 +921,7 @@ public class Items {
 					logger.warn("onedrive_api_could_not_encode_url", toEncode);
 				}
 			}
-			return cleanPath.substring(0,cleanPath.length()-1);
+			return StringUtils.stripEnd(cleanPath.substring(0,cleanPath.length()-1),".");
 		}
 		return null;
 	}
@@ -939,7 +939,7 @@ public class Items {
 			if(processedPath.length()>Integer.parseInt(ApiEnviroment.maxFileAndFolderLenght.getValue())){
 				processedPath = processedPath.substring(0, Integer.parseInt(ApiEnviroment.maxFileAndFolderLenght.getValue()));
 			}
-			return processedPath;
+			return StringUtils.stripEnd(processedPath,".");
 		}
 		return null;
 	}
@@ -957,7 +957,7 @@ public class Items {
 			if(processedPath.length()>Integer.parseInt(ApiEnviroment.maxFileAndFolderLenght.getValue())){
 				processedPath = processedPath.substring(0, Integer.parseInt(ApiEnviroment.maxFileAndFolderLenght.getValue()));
 			}
-			return processedPath;
+			return StringUtils.stripEnd(processedPath,".");
 		}
 		return null;
 	}
