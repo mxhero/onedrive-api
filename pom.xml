@@ -21,7 +21,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.mxhero.plugin.cloudstorage</groupId>
 	<artifactId>org.mxhero.plugin.cloudstorage.onedriveapi</artifactId>
-	<version>1.1.2</version>
+	<version>1.1.3-SNAPSHOT</version>
 	<inceptionYear>2015</inceptionYear>
 
 	<scm>
