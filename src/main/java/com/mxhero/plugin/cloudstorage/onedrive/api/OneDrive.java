@@ -110,9 +110,8 @@ public class OneDrive {
 	 */
 	public static BusinessCredential redeemBusiness(RedeemRequest redeemRequest) throws AuthenticationException{
 		try {
-			Map<String, Object> redeemBusinessApiResource = redeemBusinessApiResource(ApiEnviroment.graphApiUrl.getValue(), redeemRequest.getClientId(), redeemRequest.getClientSecret(), redeemRequest.getRedirectUri(), redeemRequest.getCode());
 			Map<String, Object> redeemBusinessApi = redeemBusinessApiResource(redeemRequest.getSharepointResourceId(), redeemRequest.getClientId(), redeemRequest.getClientSecret(), redeemRequest.getRedirectUri(), redeemRequest.getCode());
-			String userEmail = businessEmail((String)redeemBusinessApiResource.get("access_token"));
+			String userEmail = businessEmail((String)redeemBusinessApi.get("access_token"));
 			logger.debug("Redeem for OneDrive Business API sharepoint specific URL {}", redeemBusinessApi);
 			return BusinessCredential.builder()
 					.sharepointEndpointUri(redeemRequest.getSharepointEndpointUri())
